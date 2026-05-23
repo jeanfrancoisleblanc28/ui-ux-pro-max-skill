@@ -2,3 +2,10 @@ node_modules/
 dist/
 *.log
 .DS_Store
+
+# Bundled assets are generated from ../src/ui-ux-pro-max/ by `npm run sync`
+# (also triggered automatically by `npm install` and `npm pack` via `prepare`).
+# Source of truth lives in ../src/ui-ux-pro-max/.
+assets/data/
+assets/scripts/
+assets/templates/
