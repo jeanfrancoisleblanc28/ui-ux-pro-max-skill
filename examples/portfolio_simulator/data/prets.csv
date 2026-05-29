@@ -1,0 +1,61 @@
+id_pret,fonds,entreprise,secteur,date_decaissement,capital_initial,taux_interet,duree_mois,mois_moratoire,frequence,jour_prelevement,statut
+P-2021-0001,FLS,Entreprise B001 inc.,Services professionnels,2021-10-13,81000.0,6.69,54,12,Mensuelle,22,Actif
+P-2024-0002,FLI,Entreprise C002 inc.,Tourisme,2024-02-24,69000.0,6.31,36,12,Mensuelle,15,Actif
+P-2024-0003,FLI,Entreprise D003 inc.,Commerce de détail,2024-11-30,106000.0,8.54,48,0,Mensuelle,15,Actif
+P-2023-0004,PAUPME,Entreprise E004 inc.,Technologies,2023-01-06,23000.0,3.0,36,24,Mensuelle,1,Remboursé
+P-2021-0005,FLS,Entreprise F005 inc.,Construction,2021-06-11,196000.0,8.43,66,12,Mensuelle,15,Actif
+P-2021-0006,FLS,Entreprise G006 inc.,Tourisme,2021-06-13,85000.0,6.57,60,0,Mensuelle,15,Remboursé
+P-2022-0007,FLS,Entreprise H007 inc.,Santé,2022-03-06,263000.0,6.41,60,0,Mensuelle,15,Actif
+P-2024-0008,FLS,Entreprise I008 inc.,Construction,2024-08-03,130000.0,7.16,60,0,Mensuelle,1,Actif
+P-2021-0009,FLI,Entreprise J009 inc.,Construction,2021-05-16,56000.0,6.6,60,12,Mensuelle,15,Actif
+P-2021-0010,FLS,Entreprise K010 inc.,Transport,2021-10-20,164000.0,8.29,66,0,Mensuelle,15,Actif
+P-2022-0011,FLS,Entreprise L011 inc.,Transport,2022-03-26,171000.0,7.46,60,0,Mensuelle,25,En défaut
+P-2025-0012,FLI,Entreprise M012 inc.,Services professionnels,2025-06-11,59000.0,5.88,48,12,Mensuelle,22,Actif
+P-2021-0013,FLI,Entreprise N013 inc.,Transport,2021-01-24,249000.0,7.35,84,0,Mensuelle,15,Actif
+P-2023-0014,PAUPME,Entreprise O014 inc.,Technologies,2023-07-19,24000.0,3.0,42,24,Mensuelle,15,Actif
+P-2024-0015,FLS,Entreprise P015 inc.,Commerce de détail,2024-08-01,99000.0,7.56,84,0,Mensuelle,20,Actif
+P-2021-0016,PAUPME,Entreprise Q016 inc.,Manufacturier,2021-01-02,32000.0,3.0,60,18,Mensuelle,8,Actif
+P-2022-0017,PAUPME,Entreprise R017 inc.,Services professionnels,2022-05-06,45000.0,3.0,48,24,Mensuelle,8,Actif
+P-2025-0018,FLS,Entreprise S018 inc.,Transport,2025-04-18,259000.0,8.44,72,6,Mensuelle,15,Actif
+P-2024-0019,FLI,Entreprise T019 inc.,Technologies,2024-01-10,224000.0,6.98,54,0,Mensuelle,22,Actif
+P-2023-0020,PAUPME,Entreprise U020 inc.,Services professionnels,2023-07-14,36000.0,3.0,60,12,Mensuelle,20,Actif
+P-2021-0021,FLI,Entreprise V021 inc.,Restauration,2021-05-26,161000.0,7.56,36,0,Mensuelle,8,Actif
+P-2022-0022,PAUPME,Entreprise W022 inc.,Transport,2022-07-25,44000.0,3.0,42,12,Mensuelle,15,Actif
+P-2025-0023,FLS,Entreprise X023 inc.,Restauration,2025-05-26,274000.0,7.44,54,6,Mensuelle,8,Actif
+P-2025-0024,FLI,Entreprise Y024 inc.,Manufacturier,2025-02-02,136000.0,6.98,78,0,Mensuelle,22,Actif
+P-2022-0025,FLS,Entreprise Z025 inc.,Tourisme,2022-01-25,255000.0,6.27,54,0,Mensuelle,15,Actif
+P-2025-0026,FLI,Entreprise A026 inc.,Services professionnels,2025-07-13,100000.0,8.73,78,12,Mensuelle,1,Remboursé
+P-2025-0027,FLS,Entreprise B027 inc.,Tourisme,2025-03-24,197000.0,6.04,48,0,Mensuelle,25,Remboursé
+P-2023-0028,FLS,Entreprise C028 inc.,Technologies,2023-02-16,270000.0,8.26,54,6,Mensuelle,25,Actif
+P-2024-0029,FLI,Entreprise D029 inc.,Restauration,2024-09-17,189000.0,8.06,84,0,Mensuelle,15,Actif
+P-2025-0030,FLI,Entreprise E030 inc.,Santé,2025-03-12,62000.0,8.08,36,0,Mensuelle,25,Actif
+P-2021-0031,FLS,Entreprise F031 inc.,Santé,2021-06-14,267000.0,6.39,72,0,Mensuelle,8,Remboursé
+P-2022-0032,FLS,Entreprise G032 inc.,Santé,2022-05-20,128000.0,6.3,72,0,Mensuelle,8,Actif
+P-2022-0033,FLI,Entreprise H033 inc.,Restauration,2022-02-23,167000.0,7.33,60,0,Mensuelle,15,Actif
+P-2025-0034,FLI,Entreprise I034 inc.,Agroalimentaire,2025-03-20,184000.0,6.55,66,0,Mensuelle,8,Radié
+P-2021-0035,FLI,Entreprise J035 inc.,Technologies,2021-05-21,93000.0,6.43,66,0,Mensuelle,15,Remboursé
+P-2021-0036,FLI,Entreprise K036 inc.,Technologies,2021-01-17,159000.0,6.56,84,12,Mensuelle,8,Actif
+P-2025-0037,PAUPME,Entreprise L037 inc.,Technologies,2025-03-01,15000.0,3.0,36,18,Mensuelle,15,Actif
+P-2023-0038,FLS,Entreprise M038 inc.,Services professionnels,2023-11-02,121000.0,7.59,60,0,Mensuelle,22,Actif
+P-2024-0039,PAUPME,Entreprise N039 inc.,Agroalimentaire,2024-07-28,12000.0,3.0,42,12,Mensuelle,22,En défaut
+P-2021-0040,FLS,Entreprise O040 inc.,Santé,2021-11-02,100000.0,8.36,78,0,Mensuelle,15,Actif
+P-2023-0041,FLI,Entreprise P041 inc.,Services professionnels,2023-01-03,58000.0,6.78,36,0,Mensuelle,20,Actif
+P-2025-0042,PAUPME,Entreprise Q042 inc.,Commerce de détail,2025-03-15,45000.0,3.0,60,12,Mensuelle,15,Actif
+P-2025-0043,PAUPME,Entreprise R043 inc.,Restauration,2025-05-22,11000.0,3.0,48,24,Mensuelle,15,Radié
+P-2023-0044,FLI,Entreprise S044 inc.,Construction,2023-08-22,190000.0,6.84,36,6,Mensuelle,15,Actif
+P-2023-0045,PAUPME,Entreprise T045 inc.,Technologies,2023-03-28,45000.0,3.0,42,12,Mensuelle,20,Actif
+P-2022-0046,FLS,Entreprise U046 inc.,Technologies,2022-11-10,165000.0,8.45,72,0,Mensuelle,15,Radié
+P-2023-0047,FLS,Entreprise V047 inc.,Tourisme,2023-06-09,296000.0,6.1,72,0,Mensuelle,8,Actif
+P-2021-0048,FLI,Entreprise W048 inc.,Restauration,2021-01-04,165000.0,6.39,72,12,Mensuelle,20,Actif
+P-2024-0049,FLI,Entreprise X049 inc.,Transport,2024-09-20,240000.0,8.72,66,0,Mensuelle,15,Remboursé
+P-2021-0050,FLS,Entreprise Y050 inc.,Commerce de détail,2021-09-18,148000.0,7.74,72,6,Mensuelle,15,Actif
+P-2023-0051,FLI,Entreprise Z051 inc.,Construction,2023-05-31,217000.0,6.56,54,12,Mensuelle,25,Remboursé
+P-2024-0052,FLI,Entreprise A052 inc.,Santé,2024-09-11,185000.0,7.29,48,12,Mensuelle,20,Actif
+P-2022-0053,FLI,Entreprise B053 inc.,Manufacturier,2022-04-06,240000.0,6.32,60,0,Mensuelle,1,Remboursé
+P-2023-0054,FLI,Entreprise C054 inc.,Restauration,2023-07-22,145000.0,8.47,42,12,Mensuelle,22,Actif
+P-2025-0055,FLS,Entreprise D055 inc.,Tourisme,2025-03-18,130000.0,7.64,48,0,Mensuelle,15,Remboursé
+P-2024-0056,FLI,Entreprise E056 inc.,Agroalimentaire,2024-02-16,242000.0,7.31,36,0,Mensuelle,15,Actif
+P-2022-0057,PAUPME,Entreprise F057 inc.,Santé,2022-10-12,37000.0,3.0,60,18,Mensuelle,22,Radié
+P-2023-0058,PAUPME,Entreprise G058 inc.,Technologies,2023-07-11,32000.0,3.0,54,12,Mensuelle,25,Actif
+P-2022-0059,FLS,Entreprise H059 inc.,Transport,2022-04-26,137000.0,6.19,60,0,Mensuelle,8,Actif
+P-2021-0060,FLI,Entreprise I060 inc.,Transport,2021-05-12,96000.0,7.93,54,0,Mensuelle,25,Actif
