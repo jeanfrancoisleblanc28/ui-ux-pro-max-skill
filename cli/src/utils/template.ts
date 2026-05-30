@@ -4,8 +4,8 @@ import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-// After bun build: dist/index.js -> ../assets = cli/assets ✓
-const ASSETS_DIR = join(__dirname, '..', 'assets');
+// Works with mirrored directory layouts (src/utils/* and dist/utils/*) -> ../../assets
+const ASSETS_DIR = join(__dirname, '..', '..', 'assets');
 
 export interface PlatformConfig {
   platform: string;

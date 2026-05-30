@@ -18,8 +18,8 @@ import {
 } from '../utils/github.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-// From dist/index.js -> ../assets (one level up to cli/, then assets/)
-const ASSETS_DIR = join(__dirname, '..', 'assets');
+// Works with mirrored directory layouts (src/commands/* and dist/commands/*) -> ../../assets
+const ASSETS_DIR = join(__dirname, '..', '..', 'assets');
 
 interface InitOptions {
   ai?: AIType;

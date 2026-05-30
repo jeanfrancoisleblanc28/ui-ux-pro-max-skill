@@ -2,13 +2,15 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import type { AIType } from '../types/index.js';
 
+type DetectableAIType = Exclude<AIType, 'all'>;
+
 interface DetectionResult {
-  detected: AIType[];
+  detected: DetectableAIType[];
   suggested: AIType | null;
 }
 
 export function detectAIType(cwd: string = process.cwd()): DetectionResult {
-  const detected: AIType[] = [];
+  const detected: DetectableAIType[] = [];
 
   if (existsSync(join(cwd, '.claude'))) {
     detected.push('claude');
