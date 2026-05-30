@@ -18,7 +18,7 @@ import {
 } from '../utils/github.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-// From src/commands or dist/commands -> ../../assets
+// Works with mirrored directory layouts (src/commands/* and dist/commands/*) -> ../../assets
 const ASSETS_DIR = join(__dirname, '..', '..', 'assets');
 
 interface InitOptions {

@@ -4,7 +4,7 @@ import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-// From src/utils or dist/utils -> ../../assets
+// Works with mirrored directory layouts (src/utils/* and dist/utils/*) -> ../../assets
 const ASSETS_DIR = join(__dirname, '..', '..', 'assets');
 
 export interface PlatformConfig {
