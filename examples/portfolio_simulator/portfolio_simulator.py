@@ -245,3 +245,129 @@ with st.expander("⚠️ Données fictives — pour MVP de démonstration"):
         "simplifiée (intérêts non capitalisés). Le vieillissement basé sur les retards "
         "réels sera ajouté quand le fichier historique des perceptions sera branché."
     )
+
+# --------------------------------------------------------------------------
+# CALIBRATION AVEC PERCEPTIONS RÉELLES (modèle V2 : signatures + batch)
+# --------------------------------------------------------------------------
+st.markdown("---")
+st.subheader("📊 Calibration avec perceptions réelles (modèle V2)")
+st.caption("Charge un CSV de perceptions historiques (colonnes : `Date`, `Montant`) — "
+           "le modèle détecte signatures récurrentes + batch mensuel et projette 12 mois.")
+
+up = st.file_uploader("Perceptions historiques (CSV)", type=["csv", "tsv"],
+                       help="Format attendu : 2 colonnes Date + Montant. Séparateur tab ou virgule auto-détecté.")
+
+if up is not None:
+    try:
+        sample = up.read(2048).decode("utf-8", errors="replace")
+        up.seek(0)
+        sep = "\t" if sample.count("\t") > sample.count(",") else ","
+        per = pd.read_csv(up, sep=sep)
+        # Normalise colonnes
+        colmap = {}
+        for c in per.columns:
+            cl = c.lower()
+            if "date" in cl or "cree" in cl: colmap[c] = "Date"
+            elif "mont" in cl or "amount" in cl: colmap[c] = "Montant"
+        per = per.rename(columns=colmap)
+        per["Montant"] = per["Montant"].astype(str).str.replace(",", ".", regex=False).astype(float)
+        per["Date"] = pd.to_datetime(per["Date"])
+        per["Jour"] = per["Date"].dt.day
+        per["MontantArr"] = per["Montant"].round(2)
+        per = per.sort_values("Date").reset_index(drop=True)
+
+        ref_d = per["Date"].max()
+        total_hist = per["Montant"].sum()
+        mensuel_moy = per.groupby(per["Date"].dt.to_period("M"))["Montant"].sum().mean()
+
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Période couverte", f"{(ref_d - per['Date'].min()).days // 30} mois")
+        c2.metric("Total historique", f"{total_hist:,.0f} $")
+        c3.metric("Moyenne mensuelle", f"{mensuel_moy:,.0f} $")
+
+        # Détection signatures actives (hors batch jour 13-17)
+        hors = per[~per["Jour"].between(13, 17)].copy()
+        sig = hors.groupby(["MontantArr", "Jour"]).agg(
+            n=("Date", "count"), derniere=("Date", "max")
+        ).reset_index()
+        sig = sig[sig["n"] >= 3]
+        sig = sig[(ref_d - sig["derniere"]).dt.days <= 60]
+
+        def _freq(g):
+            if len(g) < 2: return np.nan
+            return g["Date"].sort_values().diff().dt.days.dropna().mean()
+        fr = hors.groupby(["MontantArr", "Jour"]).apply(_freq, include_groups=False).rename("freq")
+        sig = sig.merge(fr, on=["MontantArr", "Jour"], how="left")
+
+        # Tendance du batch mensuel
+        batch = per[per["Jour"].between(13, 17)].groupby(
+            per[per["Jour"].between(13, 17)]["Date"].dt.to_period("M")
+        )["Montant"].sum()
+        if len(batch) >= 3:
+            slope, intercept = np.polyfit(range(len(batch)), batch.values, 1)
+        else:
+            slope, intercept = 0.0, float(batch.mean() if len(batch) else 0)
+
+        # Projection 12 mois V2
+        from datetime import timedelta as _td
+        proj_rows = []
+        for _, s in sig.iterrows():
+            if pd.isna(s["freq"]): continue
+            nxt = s["derniere"]
+            while nxt < ref_d + _td(days=365):
+                nxt = nxt + _td(days=int(s["freq"]))
+                if ref_d < nxt <= ref_d + _td(days=365):
+                    proj_rows.append({"date": nxt, "montant": s["MontantArr"], "source": "signature"})
+        i_last = len(batch) - 1 if len(batch) else 0
+        for m in range(1, 13):
+            d = (ref_d.replace(day=1) + pd.DateOffset(months=m)).replace(day=15)
+            proj_rows.append({"date": d, "montant": max(0, slope * (i_last + m) + intercept),
+                              "source": "batch"})
+
+        proj_real = pd.DataFrame(proj_rows)
+        proj_real["mois"] = proj_real["date"].dt.to_period("M")
+        proj_mens = proj_real.groupby(["mois", "source"])["montant"].sum().unstack(fill_value=0)
+        proj_mens["total"] = proj_mens.sum(axis=1)
+        total_v2 = proj_mens["total"].sum()
+
+        st.markdown(f"**{len(sig)} signatures actives** détectées + "
+                    f"batch mensuel moyen **{batch.mean():,.0f} $/mois** "
+                    f"(tendance {slope:+,.0f} $/mois)")
+
+        # Comparaison avec projection portefeuille synthétique
+        proj_synth_12 = ech[ech["mois"] < pd.Timestamp(ref_date) + pd.DateOffset(months=12)]["total"].sum() if not ech.empty else 0
+        c4, c5, c6 = st.columns(3)
+        c4.metric("Projection V2 réelle (12m)", f"{total_v2:,.0f} $")
+        c5.metric("Projection synthétique (12m)", f"{proj_synth_12:,.0f} $")
+        ecart = (proj_synth_12 / total_v2 - 1) * 100 if total_v2 else 0
+        c6.metric("Calibration", f"{ecart:+.1f} %",
+                  help="Écart de la projection portefeuille vs réalité observée. "
+                       "Proche de 0 = portefeuille bien calibré.")
+
+        # Graphique projection V2
+        proj_disp = proj_mens.reset_index()
+        proj_disp["mois"] = proj_disp["mois"].astype(str)
+        fig_v2 = go.Figure()
+        if "signature" in proj_disp.columns:
+            fig_v2.add_trace(go.Bar(x=proj_disp["mois"], y=proj_disp["signature"],
+                                     name="Signatures récurrentes", marker_color=OK))
+        if "batch" in proj_disp.columns:
+            fig_v2.add_trace(go.Bar(x=proj_disp["mois"], y=proj_disp["batch"],
+                                     name="Batch mensuel (tendance)", marker_color=PRIMARY))
+        fig_v2.update_layout(barmode="stack", height=320,
+                              yaxis_title="Perception ($)",
+                              margin=dict(l=10, r=10, t=10, b=10))
+        st.plotly_chart(fig_v2, width='stretch')
+
+        if len(batch) >= 6:
+            recent_batch = batch.iloc[-3:].mean()
+            ancien_batch = batch.iloc[:-3].mean()
+            if recent_batch < ancien_batch * 0.9:
+                st.warning(f"⚠️ Changement de régime détecté sur le batch — "
+                           f"moyenne 3 derniers mois ({recent_batch:,.0f}$) "
+                           f"vs historique ({ancien_batch:,.0f}$) "
+                           f"= **{(recent_batch/ancien_batch-1)*100:+.1f}%**")
+
+    except Exception as e:
+        st.error(f"Impossible de parser le CSV : {e}")
+        st.caption("Format attendu : colonnes `Date` et `Montant`, séparateur tab ou virgule.")
