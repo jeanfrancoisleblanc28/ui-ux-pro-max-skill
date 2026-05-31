@@ -11,8 +11,11 @@
     "assets"
   ],
   "scripts": {
+    "sync": "node scripts/sync-assets.mjs",
+    "prepare": "node scripts/sync-assets.mjs",
     "build": "bun build src/index.ts --outdir dist --target node",
     "dev": "bun run src/index.ts",
+    "release": "node scripts/bump.mjs",
     "prepublishOnly": "bun run build"
   },
   "keywords": [
