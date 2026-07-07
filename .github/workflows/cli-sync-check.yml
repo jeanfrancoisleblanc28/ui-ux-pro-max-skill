@@ -1,0 +1,44 @@
+name: cli-sync-check
+
+on:
+  push:
+    paths:
+      - 'src/ui-ux-pro-max/**'
+      - 'cli/**'
+      - '.github/workflows/cli-sync-check.yml'
+  pull_request:
+    paths:
+      - 'src/ui-ux-pro-max/**'
+      - 'cli/**'
+      - '.github/workflows/cli-sync-check.yml'
+
+jobs:
+  sync-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: cli/assets/ subdirs must not be tracked in git
+        run: |
+          tracked=$(git ls-files cli/assets/data cli/assets/scripts cli/assets/templates)
+          if [ -n "$tracked" ]; then
+            echo "::error::cli/assets/{data,scripts,templates}/ is generated and must not be committed."
+            echo "Offending files:"
+            echo "$tracked"
+            exit 1
+          fi
+
+      - name: Populate cli/assets/ from src/
+        run: node cli/scripts/sync-assets.mjs
+
+      - name: cli/assets/ must exactly mirror src/ui-ux-pro-max/
+        run: |
+          set -e
+          diff -rq src/ui-ux-pro-max/data      cli/assets/data
+          diff -rq src/ui-ux-pro-max/scripts   cli/assets/scripts
+          diff -rq src/ui-ux-pro-max/templates cli/assets/templates
+          echo "OK: cli/assets/ is in sync with src/ui-ux-pro-max/"
