@@ -5,11 +5,17 @@ on:
     paths:
       - 'src/ui-ux-pro-max/**'
       - 'cli/**'
+      - 'skill.json'
+      - '.claude-plugin/plugin.json'
+      - '.claude-plugin/marketplace.json'
       - '.github/workflows/cli-sync-check.yml'
   pull_request:
     paths:
       - 'src/ui-ux-pro-max/**'
       - 'cli/**'
+      - 'skill.json'
+      - '.claude-plugin/plugin.json'
+      - '.claude-plugin/marketplace.json'
       - '.github/workflows/cli-sync-check.yml'
 
 jobs:
@@ -41,4 +47,32 @@ jobs:
           diff -rq src/ui-ux-pro-max/data      cli/assets/data
           diff -rq src/ui-ux-pro-max/scripts   cli/assets/scripts
           diff -rq src/ui-ux-pro-max/templates cli/assets/templates
-          echo "OK: cli/assets/ is in sync with src/ui-ux-pro-max/"
+          echo "OK: cli/assets/ mirrors src/ui-ux-pro-max/"
+
+      - name: Manifest versions must be aligned across all four files
+        run: |
+          set -e
+          v_cli=$(jq -r '.version'                  cli/package.json)
+          v_skill=$(jq -r '.version'                skill.json)
+          v_plugin=$(jq -r '.version'               .claude-plugin/plugin.json)
+          v_mp_meta=$(jq -r '.metadata.version'     .claude-plugin/marketplace.json)
+          v_mp_plugins=$(jq -r '.plugins[].version' .claude-plugin/marketplace.json | sort -u)
+
+          echo "cli/package.json               = $v_cli"
+          echo "skill.json                     = $v_skill"
+          echo ".claude-plugin/plugin.json     = $v_plugin"
+          echo "marketplace.json .metadata     = $v_mp_meta"
+          echo "marketplace.json .plugins[]    = $v_mp_plugins"
+
+          bad=0
+          [ "$v_cli" = "$v_skill" ]     || bad=1
+          [ "$v_cli" = "$v_plugin" ]    || bad=1
+          [ "$v_cli" = "$v_mp_meta" ]   || bad=1
+          # Every plugin entry must share the same single version, matching cli.
+          [ "$v_mp_plugins" = "$v_cli" ] || bad=1
+
+          if [ "$bad" != "0" ]; then
+            echo "::error::Manifest versions are not aligned. Run: node cli/scripts/bump.mjs $v_cli"
+            exit 1
+          fi
+          echo "OK: all manifests at $v_cli"
