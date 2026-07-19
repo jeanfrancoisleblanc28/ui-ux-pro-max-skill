@@ -35,15 +35,15 @@ Use this skill when the user requests any of the following:
 
 | Scenario | Trigger Examples | Start From |
 |----------|-----------------|------------|
-| **New project / page** | "做一个 landing page"、"Build a dashboard" | Step 1 → Step 2 (design system) |
-| **New component** | "Create a pricing card"、"Add a modal" | Step 3 (domain search: style, ux) |
-| **Choose style / color / font** | "What style fits a fintech app?"、"推荐配色" | Step 2 (design system) |
-| **Review existing UI** | "Review this page for UX issues"、"检查无障碍" | Quick Reference checklist above |
-| **Fix a UI bug** | "Button hover is broken"、"Layout shifts on load" | Quick Reference → relevant section |
-| **Improve / optimize** | "Make this faster"、"Improve mobile experience" | Step 3 (domain search: ux, react) |
+| **New project / page** | "Build a landing page", "Build a dashboard" | Step 1 → Step 2 (design system) |
+| **New component** | "Create a pricing card", "Add a modal" | Step 3 (domain search: style, ux) |
+| **Choose style / color / font** | "What style fits a fintech app?", "Recommend a color palette" | Step 2 (design system) |
+| **Review existing UI** | "Review this page for UX issues", "Check accessibility" | Quick Reference checklist above |
+| **Fix a UI bug** | "Button hover is broken", "Layout shifts on load" | Quick Reference → relevant section |
+| **Improve / optimize** | "Make this faster", "Improve mobile experience" | Step 3 (domain search: ux, react) |
 | **Implement dark mode** | "Add dark mode support" | Step 3 (domain: style "dark mode") |
 | **Add charts / data viz** | "Add an analytics dashboard chart" | Step 3 (domain: chart) |
-| **Stack best practices** | "React performance tips"、"SwiftUI navigation" | Step 4 (stack search) |
+| **Stack best practices** | "React performance tips", "SwiftUI navigation" | Step 4 (stack search) |
 
 Follow this workflow:
 
@@ -168,7 +168,7 @@ python3 skills/ui-ux-pro-max/scripts/search.py "<keyword>" --stack react-native
 
 ## Example Workflow
 
-**User request:** "Make an AI search homepage。"
+**User request:** "Make an AI search homepage."
 
 ### Step 1: Analyze Requirements
 - Product type: Tool (AI search engine)
@@ -257,10 +257,10 @@ Scope notice: The rules below are for App UI (iOS/Android/React Native/Flutter),
 
 ### Icons & Visual Elements
 
-- 默认图标库使用 **Phosphor (`@phosphor-icons/react`)**。`src/ui-ux-pro-max/data/icons.csv` 中列出的只是常用推荐图标，不是完整集合。
-- 当推荐表中找不到合适的图标时：
-  - **优先继续从 Phosphor 的完整图标集中选择任何语义更贴切的图标**；
-  - 如果 Phosphor 也没有理想选项，可以使用 **Heroicons (`@heroicons/react`)** 作为备选，注意保持风格一致（线性/填充、笔画粗细、圆角风格）。
+- Default icon library: **Phosphor (`@phosphor-icons/react`)**. The icons listed in `icons.csv` (the `icons` domain) are commonly used recommendations, not the complete set.
+- When the recommendation table has no suitable icon:
+  - **Prefer picking any semantically closer icon from Phosphor's full icon set**;
+  - If Phosphor has no ideal option either, use **Heroicons (`@heroicons/react`)** as a fallback, keeping the style consistent (outline/fill, stroke width, corner rounding).
 
 | Rule | Standard | Avoid | Why It Matters |
 |------|----------|--------|----------------|
