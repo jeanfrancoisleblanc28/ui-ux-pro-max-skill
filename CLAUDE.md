@@ -73,7 +73,7 @@ src/ui-ux-pro-max/                  # Source of truth
 │   ├── products.csv, styles.csv, colors.csv, typography.csv,
 │   ├── charts.csv, landing.csv, ux-guidelines.csv, icons.csv,
 │   ├── google-fonts.csv, ui-reasoning.csv, react-performance.csv,
-│   ├── app-interface.csv, design.csv, draft.csv
+│   ├── app-interface.csv
 │   ├── _sync_all.py                # Helper to keep colors.csv aligned with products.csv
 │   └── stacks/                     # Per-stack guideline CSVs (16 files)
 ├── scripts/
@@ -170,7 +170,13 @@ Each platform's target folders are defined in `AI_FOLDERS` (e.g. `claude → .cl
 
    You should never see `cli/assets/data/`, `cli/assets/scripts/`, or `cli/assets/templates/` in `git status`. If you do, you've edited the wrong copy — edit `src/ui-ux-pro-max/` instead and re-run sync.
 
-4. **In-repo `.claude/skills/ui-ux-pro-max/SKILL.md`** — this file is pre-rendered output, used to dogfood the skill in this repo. Regenerate it from the templates (e.g. by running `uipro init --ai claude --force` in a scratch dir and copying the result back) rather than hand-editing.
+4. **In-repo `.claude/skills/ui-ux-pro-max/SKILL.md`** — this file is pre-rendered output, used to dogfood the skill in this repo. Never hand-edit it; after changing templates, regenerate it with:
+
+   ```bash
+   node cli/scripts/render-skill.mjs claude --write .claude/skills/ui-ux-pro-max/SKILL.md
+   ```
+
+   CI (`cli-sync-check.yml`) fails if this file drifts from the templates (`render-skill.mjs claude --check`). The script mirrors the substitution rules of `cli/src/utils/template.ts` — keep the two in sync when changing either.
 
 5. **Version bumps** — `cli/package.json`, `skill.json`, `.claude-plugin/plugin.json`, and `.claude-plugin/marketplace.json` all carry the version. Bump them atomically:
 
@@ -201,8 +207,9 @@ The published package ships `dist/` + `assets/` (see `cli/package.json` `files`)
 
 ## CI
 
-- `.github/workflows/python-package-conda.yml` — runs `flake8` (syntax errors fail the build; style warnings exit-zero) and `pytest` against the Python code.
-- `.github/workflows/claude.yml`, `claude-code-review.yml` — Claude Code GitHub App workflows.
+- `.github/workflows/python-package-conda.yml` — runs `flake8` (syntax errors fail the build; style warnings exit-zero) and `pytest tests/` (engine smoke tests + CSV structural validation — every CSV row must match its header's field count; see `tests/`).
+- `.github/workflows/cli-sync-check.yml` — guards the sync rules: `cli/assets/` subdirs must not be tracked, regenerated assets must mirror `src/ui-ux-pro-max/`, the in-repo SKILL.md must match the templates (`render-skill.mjs claude --check`), and all four manifest versions must be aligned.
+- `.github/workflows/claude.yml`, `claude-code-review.yml` — Claude Code GitHub App workflows (require the `ANTHROPIC_API_KEY` repo secret).
 
 ## Git Workflow
 
