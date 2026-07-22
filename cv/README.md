@@ -10,4 +10,4 @@ chromium --headless --no-sandbox --no-pdf-header-footer \
   --print-to-pdf=cv-jean-francois-leblanc.pdf cv-jean-francois-leblanc.html
 ```
 
-Champs à compléter avant envoi : `[Téléphone]`, `[Courriel]`, `[LinkedIn]`, `[Ville]` (Deloitte), `[sciences comptables]`, `[Université]`, `[Année]`, `[niveau à préciser]` (anglais).
+Champ restant à compléter avant envoi : `[Ville]` (bureau Deloitte).
