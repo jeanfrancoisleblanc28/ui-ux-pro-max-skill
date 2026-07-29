@@ -30,7 +30,21 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Check Claude credentials
+        id: check-credentials
+        env:
+          OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "$OAUTH_TOKEN" ] || [ -n "$API_KEY" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping Claude Code: neither CLAUDE_CODE_OAUTH_TOKEN nor ANTHROPIC_API_KEY is configured."
+          fi
+
       - name: Run Claude Code
+        if: steps.check-credentials.outputs.available == 'true'
         id: claude
         uses: anthropics/claude-code-action@v1
         with:
