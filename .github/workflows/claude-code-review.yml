@@ -19,6 +19,10 @@ jobs:
     #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
 
     runs-on: ubuntu-latest
+    # The review is best-effort: a failure must not mark the PR red.
+    # (The action has been fast-failing ~25s on every PR; root cause not yet
+    # diagnosed — see closed PR #6 for the investigation history.)
+    continue-on-error: true
     permissions:
       contents: read
       pull-requests: read
