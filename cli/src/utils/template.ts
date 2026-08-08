@@ -144,12 +144,15 @@ export async function renderSkillFile(config: PlatformConfig, isGlobal = false):
     .replace(/\{\{SKILL_OR_WORKFLOW\}\}/g, config.skillOrWorkflow)
     .replace(/\{\{QUICK_REFERENCE\}\}/g, quickRefWithNewline);
 
-  // For global install, rewrite relative script paths to absolute ~/root/ paths
+  // For global install, rewrite relative script paths to absolute ~/root/ paths.
+  // Match the platform's own scriptPath — not a hard-coded skills/ prefix — so
+  // platforms like copilot (prompts/) and kiro (steering/) are rewritten too.
   if (isGlobal) {
     const globalPrefix = `~/${config.folderStructure.root}/`;
+    const escapedScriptPath = config.scriptPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     content = content.replace(
-      /python3 skills\//g,
-      `python3 ${globalPrefix}skills/`
+      new RegExp(`python3 ${escapedScriptPath}`, 'g'),
+      `python3 ${globalPrefix}${config.scriptPath}`
     );
   }
 

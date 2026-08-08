@@ -429,13 +429,14 @@ python3 skills/ui-ux-pro-max/scripts/search.py "<keyword>" --domain <domain> [-n
 | Chart recommendations | `chart` | `--domain chart "real-time dashboard"` |
 | UX best practices | `ux` | `--domain ux "animation accessibility"` |
 | Landing structure | `landing` | `--domain landing "hero social-proof"` |
-| React Native perf | `react` | `--domain react "rerender memo list"` |
+| React/Next.js performance | `react` | `--domain react "rerender memo list"` |
 | App interface a11y | `web` | `--domain web "accessibilityLabel touch safe-areas"` |
-| AI prompt / CSS keywords | `prompt` | `--domain prompt "minimalism"` |
+| Icon libraries & names | `icons` | `--domain icons "arrow navigation"` |
+| Google Fonts catalog | `google-fonts` | `--domain google-fonts "geometric sans"` |
 
-### Step 4: Stack Guidelines (React Native)
+### Step 4: Stack Guidelines
 
-Get React Native implementation-specific best practices:
+Get implementation-specific best practices for your stack (16 available, see Available Stacks below):
 
 ```bash
 python3 skills/ui-ux-pro-max/scripts/search.py "<keyword>" --stack react-native
@@ -458,13 +459,29 @@ python3 skills/ui-ux-pro-max/scripts/search.py "<keyword>" --stack react-native
 | `ux` | Best practices, anti-patterns | animation, accessibility, z-index, loading |
 | `react` | React/Next.js performance | waterfall, bundle, suspense, memo, rerender, cache |
 | `web` | App interface guidelines (iOS/Android/React Native) | accessibilityLabel, touch targets, safe areas, Dynamic Type |
-| `prompt` | AI prompts, CSS keywords | (style name) |
+| `icons` | Icon libraries, names, import code | arrow, navigation, lucide, heroicons |
+| `google-fonts` | Full Google Fonts catalog | geometric, serif, variable, handwriting |
 
 ### Available Stacks
 
 | Stack | Focus |
 |-------|-------|
-| `react-native` | Components, Navigation, Lists |
+| `html-tailwind` | Layout, Images, Colors |
+| `react` | State, Rendering, Effects |
+| `nextjs` | Routing, Rendering, Data Fetching |
+| `vue` | Reactivity, Templates, Performance |
+| `nuxtjs` | Data Fetching, Routing, Server |
+| `nuxt-ui` | Components, Forms, Tables |
+| `svelte` | Reactivity, Stores, SvelteKit |
+| `astro` | Architecture, Components, Performance |
+| `swiftui` | State, Layout, Views |
+| `react-native` | Styling, Lists, Performance |
+| `flutter` | State, Layout, Widgets |
+| `shadcn` | Components, Forms, Setup |
+| `jetpack-compose` | Layout, State, Performance |
+| `threejs` | Setup, Geometry, Raycasting |
+| `angular` | Components, Performance, Routing |
+| `laravel` | Blade Templates, Livewire, Inertia.js |
 
 ---
 
@@ -527,7 +544,7 @@ python3 skills/ui-ux-pro-max/scripts/search.py "fintech crypto" --design-system 
 - Use **multi-dimensional keywords** — combine product + industry + tone + density: `"entertainment social vibrant content-dense"` not just `"app"`
 - Try different keywords for the same need: `"playful neon"` → `"vibrant dark"` → `"content-first minimal"`
 - Use `--design-system` first for full recommendations, then `--domain` to deep-dive any dimension you're unsure about
-- Always add `--stack react-native` for implementation-specific guidance
+- Always add `--stack <stack>` (e.g. `--stack react-native`) for implementation-specific guidance
 
 ### Common Sticking Points
 
