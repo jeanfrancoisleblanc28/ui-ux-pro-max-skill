@@ -8,28 +8,44 @@ Ce projet existe pour une raison simple : aider une infirmière bien réelle dan
 
 > ⚠️ **Cadre d'utilisation.** Le Copilote BCM est une aide à la collecte et à la documentation. Il ne recommande aucun traitement et ne remplace ni le jugement professionnel ni la procédure de l'établissement. Chaque rapport est relu et validé par l'infirmière avant transcription au dossier. **Aucun renseignement identificatoire** (nom, numéro d'assurance maladie, date de naissance complète, adresse) ne doit être saisi — l'outil est conçu pour fonctionner sans.
 
-## Installer l'assistant (5 minutes, à faire une fois)
+## Installation
 
-Faites l'installation **depuis son compte à elle**, pour qu'elle retrouve l'assistant dans sa liste à chaque fois.
+**Rien ne s'installe sur un ordinateur.** L'assistant vit dans un compte ChatGPT : une fois configuré, elle le retrouve sur n'importe quel appareil — ordinateur, tablette, téléphone — simplement en se connectant.
 
-### Option A — ChatGPT (GPT personnalisé)
+La marche à suivre ci-dessous crée le GPT **dans votre compte** et le lui partage par lien privé. C'est la meilleure façon de faire pour une raison précise : quand vous améliorerez le prompt après ses premiers vrais BCM, elle profitera de la mise à jour instantanément, sans que vous ayez à retoucher quoi que ce soit chez elle. Et ses conversations restent dans son compte à elle — vous n'y avez pas accès, ce qui est exactement ce qu'on veut.
 
-1. Créer un GPT personnalisé ;
-2. Coller le contenu intégral de `prompt/instructions-systeme.md` dans le champ **Instructions** (le fichier fait moins de 8 000 caractères — il entre au complet) ;
-3. Joindre les **trois fichiers** de `connaissances/` comme fichiers de connaissances ;
-4. **Désactiver** toutes les capacités (navigation web, génération d'images, exécution de code) ;
-5. Dans les réglages du compte, **désactiver l'entraînement sur les données** et garder le GPT privé (« Seulement moi »).
+**Ce qu'il faut avant de commencer :** un abonnement ChatGPT payant sur votre compte (nécessaire pour créer un GPT personnalisé). Elle pourra l'utiliser avec un compte gratuit, mais les limites du gratuit risquent de couper un BCM en plein milieu ; pour un usage régulier au travail, un abonnement de son côté est le petit investissement qui rend l'outil fiable.
 
-### Option B — Claude (Projet)
+### Étape 1 — Créer le GPT (chez vous, 5 minutes)
 
-1. Créer un projet ;
-2. Coller `prompt/instructions-systeme.md` dans les **instructions du projet** ;
-3. Ajouter les trois fichiers de `connaissances/` aux **connaissances du projet**.
+1. Dans ChatGPT, ouvrez **Mes GPT → Créer un GPT**, puis l'onglet **Configurer** ;
+2. Donnez-lui un nom clair — « Copilote BCM » — et une description courte ;
+3. Collez le contenu intégral de `prompt/instructions-systeme.md` dans le champ **Instructions**. Le fichier fait moins de 8 000 caractères : il entre au complet, sans coupure ;
+4. Dans **Connaissances**, téléversez les **trois fichiers** du dossier `connaissances/` : `entrevue-bcm.md`, `radar-securite.md`, `gabarit-documentation.md` ;
+5. Dans **Fonctionnalités**, **décochez tout** — navigation web, génération d'images, interpréteur de code. L'assistant n'en a besoin d'aucune, et chaque capacité inutile est une source d'erreur en moins.
 
-### Ensuite
+### Étape 2 — Partager le lien privé (chez vous, 1 minute)
 
-- Remettez-lui **`GUIDE-UTILISATION.md`** — une seule page, écrite pour elle, imprimable ;
-- Faites un premier BCM fictif ensemble (le dialogue de `docs/04-cas-utilisation.md` peut servir de scénario) pour qu'elle voie comment ça se passe avant un vrai patient.
+Cliquez sur **Créer / Enregistrer**, puis choisissez **« Toute personne disposant du lien »**. Ne le publiez pas au magasin public de GPT. Copiez le lien et envoyez-le-lui.
+
+### Étape 3 — Chez elle (10 minutes, une seule fois)
+
+1. Elle se connecte à **son** compte ChatGPT et ouvre votre lien ;
+2. Elle démarre une conversation : le GPT s'ajoute automatiquement à sa liste. Elle peut l'**épingler** pour le garder en haut ;
+3. Dans les réglages de **son** compte — *Paramètres → Contrôles des données* — **désactivez l'amélioration du modèle pour tous** (l'entraînement sur ses conversations). C'est le réglage qui compte le plus ;
+4. Sur son ordinateur : ajoutez un **favori** dans le navigateur, ou un raccourci sur le bureau, pour qu'elle y arrive en un clic. Sur son téléphone : l'application ChatGPT, avec l'assistant épinglé.
+
+### Étape 4 — Le premier essai, ensemble
+
+Remettez-lui **`GUIDE-UTILISATION.md`** — une seule page, écrite pour elle, à imprimer et garder près du clavier. Puis faites **un premier BCM fictif ensemble**, avant un vrai patient : le dialogue de `docs/04-cas-utilisation.md` fait un bon scénario. Dix minutes qui enlèvent toute la nervosité de la première vraie fois.
+
+### Plus tard : améliorer l'assistant
+
+Vous modifiez le GPT depuis votre compte (Instructions ou fichiers de connaissances), vous enregistrez — c'est tout. Elle utilise la nouvelle version dès sa prochaine conversation, sans rien faire de son côté. C'est précisément pour ça qu'on l'a monté chez vous.
+
+### Variante — Claude (Projet)
+
+Si vous préférez Claude : il n'y a pas de partage simple de projet entre comptes personnels, il faut donc créer le Projet **directement dans son compte à elle** (chez elle, en visio avec partage d'écran, ou depuis votre ordinateur en navigation privée — vous vous déconnectez après). Collez `prompt/instructions-systeme.md` dans les instructions du projet, ajoutez les trois fichiers de `connaissances/` aux connaissances du projet. Les mises à jour futures exigeront de refaire ce détour à chaque fois.
 
 ## Les trois règles qui la protègent
 
