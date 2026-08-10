@@ -60,7 +60,7 @@ Extract key information from user request:
 **Always start with `--design-system`** to get comprehensive recommendations with reasoning:
 
 ```bash
-python3 skills/ui-ux-pro-max/scripts/search.py "<product_type> <industry> <keywords>" --design-system [-p "Project Name"]
+python3 {{SCRIPT_PATH}} "<product_type> <industry> <keywords>" --design-system [-p "Project Name"]
 ```
 
 This command:
@@ -71,7 +71,7 @@ This command:
 
 **Example:**
 ```bash
-python3 skills/ui-ux-pro-max/scripts/search.py "beauty spa wellness service" --design-system -p "Serenity Spa"
+python3 {{SCRIPT_PATH}} "beauty spa wellness service" --design-system -p "Serenity Spa"
 ```
 
 ### Step 2b: Persist Design System (Master + Overrides Pattern)
@@ -79,7 +79,7 @@ python3 skills/ui-ux-pro-max/scripts/search.py "beauty spa wellness service" --d
 To save the design system for **hierarchical retrieval across sessions**, add `--persist`:
 
 ```bash
-python3 skills/ui-ux-pro-max/scripts/search.py "<query>" --design-system --persist -p "Project Name"
+python3 {{SCRIPT_PATH}} "<query>" --design-system --persist -p "Project Name"
 ```
 
 This creates:
@@ -88,7 +88,7 @@ This creates:
 
 **With page-specific override:**
 ```bash
-python3 skills/ui-ux-pro-max/scripts/search.py "<query>" --design-system --persist -p "Project Name" --page "dashboard"
+python3 {{SCRIPT_PATH}} "<query>" --design-system --persist -p "Project Name" --page "dashboard"
 ```
 
 This also creates:
@@ -113,7 +113,7 @@ Now, generate the code...
 After getting the design system, use domain searches to get additional details:
 
 ```bash
-python3 skills/ui-ux-pro-max/scripts/search.py "<keyword>" --domain <domain> [-n <max_results>]
+python3 {{SCRIPT_PATH}} "<keyword>" --domain <domain> [-n <max_results>]
 ```
 
 **When to use detailed searches:**
@@ -127,16 +127,17 @@ python3 skills/ui-ux-pro-max/scripts/search.py "<keyword>" --domain <domain> [-n
 | Chart recommendations | `chart` | `--domain chart "real-time dashboard"` |
 | UX best practices | `ux` | `--domain ux "animation accessibility"` |
 | Landing structure | `landing` | `--domain landing "hero social-proof"` |
-| React Native perf | `react` | `--domain react "rerender memo list"` |
+| React/Next.js performance | `react` | `--domain react "rerender memo list"` |
 | App interface a11y | `web` | `--domain web "accessibilityLabel touch safe-areas"` |
-| AI prompt / CSS keywords | `prompt` | `--domain prompt "minimalism"` |
+| Icon libraries & names | `icons` | `--domain icons "arrow navigation"` |
+| Google Fonts catalog | `google-fonts` | `--domain google-fonts "geometric sans"` |
 
-### Step 4: Stack Guidelines (React Native)
+### Step 4: Stack Guidelines
 
-Get React Native implementation-specific best practices:
+Get implementation-specific best practices for your stack (16 available, see Available Stacks below):
 
 ```bash
-python3 skills/ui-ux-pro-max/scripts/search.py "<keyword>" --stack react-native
+python3 {{SCRIPT_PATH}} "<keyword>" --stack react-native
 ```
 
 ---
@@ -156,13 +157,29 @@ python3 skills/ui-ux-pro-max/scripts/search.py "<keyword>" --stack react-native
 | `ux` | Best practices, anti-patterns | animation, accessibility, z-index, loading |
 | `react` | React/Next.js performance | waterfall, bundle, suspense, memo, rerender, cache |
 | `web` | App interface guidelines (iOS/Android/React Native) | accessibilityLabel, touch targets, safe areas, Dynamic Type |
-| `prompt` | AI prompts, CSS keywords | (style name) |
+| `icons` | Icon libraries, names, import code | arrow, navigation, lucide, heroicons |
+| `google-fonts` | Full Google Fonts catalog | geometric, serif, variable, handwriting |
 
 ### Available Stacks
 
 | Stack | Focus |
 |-------|-------|
-| `react-native` | Components, Navigation, Lists |
+| `html-tailwind` | Layout, Images, Colors |
+| `react` | State, Rendering, Effects |
+| `nextjs` | Routing, Rendering, Data Fetching |
+| `vue` | Reactivity, Templates, Performance |
+| `nuxtjs` | Data Fetching, Routing, Server |
+| `nuxt-ui` | Components, Forms, Tables |
+| `svelte` | Reactivity, Stores, SvelteKit |
+| `astro` | Architecture, Components, Performance |
+| `swiftui` | State, Layout, Views |
+| `react-native` | Styling, Lists, Performance |
+| `flutter` | State, Layout, Widgets |
+| `shadcn` | Components, Forms, Setup |
+| `jetpack-compose` | Layout, State, Performance |
+| `threejs` | Setup, Geometry, Raycasting |
+| `angular` | Components, Performance, Routing |
+| `laravel` | Blade Templates, Livewire, Inertia.js |
 
 ---
 
@@ -179,7 +196,7 @@ python3 skills/ui-ux-pro-max/scripts/search.py "<keyword>" --stack react-native
 ### Step 2: Generate Design System (REQUIRED)
 
 ```bash
-python3 skills/ui-ux-pro-max/scripts/search.py "AI search tool modern minimal" --design-system -p "AI Search"
+python3 {{SCRIPT_PATH}} "AI search tool modern minimal" --design-system -p "AI Search"
 ```
 
 **Output:** Complete design system with pattern, style, colors, typography, effects, and anti-patterns.
@@ -188,16 +205,16 @@ python3 skills/ui-ux-pro-max/scripts/search.py "AI search tool modern minimal" -
 
 ```bash
 # Get style options for a modern tool product
-python3 skills/ui-ux-pro-max/scripts/search.py "minimalism dark mode" --domain style
+python3 {{SCRIPT_PATH}} "minimalism dark mode" --domain style
 
 # Get UX best practices for search interaction and loading
-python3 skills/ui-ux-pro-max/scripts/search.py "search loading animation" --domain ux
+python3 {{SCRIPT_PATH}} "search loading animation" --domain ux
 ```
 
 ### Step 4: Stack Guidelines
 
 ```bash
-python3 skills/ui-ux-pro-max/scripts/search.py "list performance navigation" --stack react-native
+python3 {{SCRIPT_PATH}} "list performance navigation" --stack react-native
 ```
 
 **Then:** Synthesize design system + detailed searches and implement the design.
@@ -210,10 +227,10 @@ The `--design-system` flag supports two output formats:
 
 ```bash
 # ASCII box (default) - best for terminal display
-python3 skills/ui-ux-pro-max/scripts/search.py "fintech crypto" --design-system
+python3 {{SCRIPT_PATH}} "fintech crypto" --design-system
 
 # Markdown - best for documentation
-python3 skills/ui-ux-pro-max/scripts/search.py "fintech crypto" --design-system -f markdown
+python3 {{SCRIPT_PATH}} "fintech crypto" --design-system -f markdown
 ```
 
 ---
@@ -225,7 +242,7 @@ python3 skills/ui-ux-pro-max/scripts/search.py "fintech crypto" --design-system 
 - Use **multi-dimensional keywords** — combine product + industry + tone + density: `"entertainment social vibrant content-dense"` not just `"app"`
 - Try different keywords for the same need: `"playful neon"` → `"vibrant dark"` → `"content-first minimal"`
 - Use `--design-system` first for full recommendations, then `--domain` to deep-dive any dimension you're unsure about
-- Always add `--stack react-native` for implementation-specific guidance
+- Always add `--stack <stack>` (e.g. `--stack react-native`) for implementation-specific guidance
 
 ### Common Sticking Points
 
