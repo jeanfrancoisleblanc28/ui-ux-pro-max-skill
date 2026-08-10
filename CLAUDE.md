@@ -12,6 +12,7 @@ It ships:
 - A **design-system generator** that aggregates multiple searches and applies reasoning rules from `ui-reasoning.csv` to recommend a complete design system (pattern + style + colors + typography + effects + anti-patterns).
 - An **npm CLI (`uipro-cli`)** in `cli/` that installs the skill into any of ~18 supported AI assistants by rendering platform-specific templates and copying the data + scripts into the right folder (`.claude/`, `.cursor/`, `.windsurf/`, `.factory/`, `.codex/`, …).
 - A **Claude marketplace plugin** packaged via `.claude-plugin/`.
+- A **DÉPS AI Operating System** (`src/deps-ai-os/`) — a second, independent Python engine (also stdlib-only) that routes financing, valuation and economic-development work through 22 documented modules in 6 domains and enforces a quality gate before delivery. It is *not* part of the npm package; see the dedicated section below.
 
 ## Search Command
 
@@ -64,6 +65,32 @@ python3 src/ui-ux-pro-max/scripts/search.py "<query>" --design-system --persist 
 ```
 
 Writes to `design-system/<project-slug>/MASTER.md` and optionally `design-system/<project-slug>/pages/<page>.md`. Page overrides take precedence over the master at lookup time.
+
+## DÉPS AI Operating System
+
+A second engine, independent of the design search engine, living in `src/deps-ai-os/` and surfaced as the in-repo skill `.claude/skills/deps-ai-os/`. Its purpose is process enforcement, not design: it decides *which analysis modules run in which order* for a financing, valuation or economic-development request, and it blocks delivery of a deliverable that has not passed its controls.
+
+```bash
+python3 src/deps-ai-os/scripts/deps.py <commande> [options] [--json]
+```
+
+| Commande | Rôle |
+|---|---|
+| `route "<demande>"` | Oriente une demande en langage naturel vers un parcours ou un module, et signale les paramètres de politique non validés que la séquence mobilise |
+| `module <ID\|nom>` | Fiche complète d'un module : entrées, méthode en étapes, sorties, pièges, formules, portes QA, chaîne d'exécution |
+| `pipeline [<ID\|nom>]` | Liste les 8 parcours pré-câblés, ou détaille l'un d'eux |
+| `params [--fonds] [--statut] [--module]` | Paramètres de la politique d'investissement et leur statut de validation |
+| `formule [<recherche>] [--module]` | Les 24 formules normalisées avec termes, interprétation, seuils indicatifs et pièges |
+| `qa [--module] [--bloquants]` | Les 28 contrôles qualité |
+| `preflight [--type <CODE>]` | Liste à cocher avant remise, avec la convention de nommage attendue |
+| `nomenclature [--type] [--module]` | Conventions de nommage et de versionnage des livrables |
+| `doctor` | Contrôle d'intégrité du référentiel ; sort en code 1 si une anomalie est détectée |
+
+**Structure : 22 modules en 6 domaines** — `01-FINANCEMENT` (F1–F4), `02-FLI-FLS` (P1–P4), `03-EVALUATION` (E1–E4), `04-DEVELOPPEMENT-ECONOMIQUE` (D1–D3), `05-PRODUCTION` (R1–R3, dont `R1 ui-ux-pro-max` qui fait le pont vers le moteur de design de ce dépôt), `06-QA` (Q1–Q4).
+
+**Invariant central.** Les 22 paramètres de politique de `data/parametres-politique.csv` sont livrés au statut `A_VALIDER` avec la valeur `À_RENSEIGNER`. Le système ne connaît pas la politique d'investissement de l'organisation et n'invente aucune valeur : plafonds, taux, ratios entre fonds, mises de fonds minimales et seuils de délégation doivent être renseignés depuis le document en vigueur avant tout usage réel. Un test (`test_aucun_parametre_non_valide_ne_porte_de_valeur_chiffree`) empêche qu'une valeur inventée soit introduite dans un paramètre non validé.
+
+Chaque domaine porte sa doctrine dans `src/deps-ai-os/references/<NN>-<domaine>.md`. Les seuils financiers d'usage (ratio de couverture, levier, etc.) vivent dans `formules.csv` et sont explicitement qualifiés d'`INDICATIF`, jamais de règle de politique.
 
 ## Architecture
 
@@ -120,6 +147,28 @@ cli/                                # npm package `uipro-cli` (v2.5.0)
 ├── data    -> ../../../src/ui-ux-pro-max/data       (symlink)
 └── scripts -> ../../../src/ui-ux-pro-max/scripts    (symlink)
 
+src/deps-ai-os/                     # DÉPS AI Operating System — independent engine
+├── data/                           # Référentiel CSV
+│   ├── modules.csv                 # 22 modules: objectif, entrées, méthode, sorties,
+│   │                               #   amont/aval, portes QA, pièges
+│   ├── pipelines.csv               # 8 parcours pré-câblés
+│   ├── formules.csv                # 24 formules normalisées (seuils qualifiés INDICATIF)
+│   ├── parametres-politique.csv    # 22 paramètres de politique + statut de validation
+│   ├── controles-qa.csv            # 28 contrôles qualité, 19 bloquants
+│   └── nomenclature.csv            # Conventions de nommage des livrables
+├── scripts/
+│   ├── core.py                     # Chargement CSV, BM25 sans accents, chaînes, doctor()
+│   └── deps.py                     # CLI (route, module, pipeline, params, formule, qa,
+│                                   #   preflight, nomenclature, doctor)
+├── references/                     # Doctrine par domaine (6 documents)
+└── tests/test_deps_ai_os.py        # 39 tests: intégrité, routage, invariants
+
+.claude/skills/deps-ai-os/          # In-repo skill (dogfooding)
+├── SKILL.md
+├── data       -> ../../../src/deps-ai-os/data          (symlink)
+├── scripts    -> ../../../src/deps-ai-os/scripts       (symlink)
+└── references -> ../../../src/deps-ai-os/references    (symlink)
+
 .claude/skills/                     # Sibling design skills bundled with this repo:
                                     #   banner-design, brand, design, design-system,
                                     #   slides, ui-styling
@@ -172,6 +221,8 @@ Each platform's target folders are defined in `AI_FOLDERS` (e.g. `claude → .cl
 
 4. **In-repo `.claude/skills/ui-ux-pro-max/SKILL.md`** — this file is pre-rendered output, used to dogfood the skill in this repo. Regenerate it from the templates (e.g. by running `uipro init --ai claude --force` in a scratch dir and copying the result back) rather than hand-editing.
 
+   **`.claude/skills/deps-ai-os/SKILL.md` is different**: it is hand-written, not template-rendered, because the DÉPS AI OS is not distributed through the npm CLI. Edit it directly. Its `data`, `scripts` and `references` symlinks point at `src/deps-ai-os/`, so the referential and the engine are edited only there. The DÉPS engine is deliberately **not** mirrored into `cli/assets/` and is not touched by `npm run sync`.
+
 5. **Version bumps** — `cli/package.json`, `skill.json`, `.claude-plugin/plugin.json`, and `.claude-plugin/marketplace.json` all carry the version. Bump them atomically:
 
    ```bash
@@ -196,12 +247,13 @@ The published package ships `dist/` + `assets/` (see `cli/package.json` `files`)
 
 ## Prerequisites
 
-- Python 3.x (no external dependencies — only stdlib `csv`, `re`, `math`, `pathlib`, `collections`).
+- Python 3.x (no external dependencies — only stdlib `csv`, `re`, `math`, `pathlib`, `collections`, `unicodedata`).
 - Node.js + Bun (for working on the CLI). End users of `npx uipro-cli` only need Node.
+- `pytest` only to run the DÉPS AI OS test suite locally (`pytest src/deps-ai-os/tests -q`); the engines themselves need nothing beyond the stdlib.
 
 ## CI
 
-- `.github/workflows/python-package-conda.yml` — runs `flake8` (syntax errors fail the build; style warnings exit-zero) and `pytest` against the Python code.
+- `.github/workflows/python-package-conda.yml` — runs `flake8` over `src/ui-ux-pro-max/scripts` and `src/deps-ai-os/{scripts,tests}` (syntax errors fail the build; style warnings exit-zero), then `pytest src/deps-ai-os/tests` and `deps.py doctor` (which exits 1 on any referential inconsistency).
 - `.github/workflows/claude.yml`, `claude-code-review.yml` — Claude Code GitHub App workflows.
 
 ## Git Workflow
