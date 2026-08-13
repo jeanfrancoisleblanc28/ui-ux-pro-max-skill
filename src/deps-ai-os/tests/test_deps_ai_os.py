@@ -18,7 +18,7 @@ import pytest
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
-import core  # noqa: E402
+import deps_core as core  # noqa: E402
 
 
 # ============ INTEGRITE DU REFERENTIEL ============

@@ -19,6 +19,10 @@ jobs:
     #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
 
     runs-on: ubuntu-latest
+    # The review is best-effort: a failure must not mark the PR red.
+    # (The action has been fast-failing ~25s on every PR; root cause not yet
+    # diagnosed — see closed PR #6 for the investigation history.)
+    continue-on-error: true
     permissions:
       contents: read
       pull-requests: read
@@ -31,8 +35,22 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Check Claude credentials
+        id: check-credentials
+        env:
+          OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "$OAUTH_TOKEN" ] || [ -n "$API_KEY" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping Claude Code Review: neither CLAUDE_CODE_OAUTH_TOKEN nor ANTHROPIC_API_KEY is configured."
+          fi
+
       - name: Run Claude Code Review
         id: claude-review
+        if: steps.check-credentials.outputs.available == 'true'
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}

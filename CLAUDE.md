@@ -100,7 +100,7 @@ src/ui-ux-pro-max/                  # Source of truth
 │   ├── products.csv, styles.csv, colors.csv, typography.csv,
 │   ├── charts.csv, landing.csv, ux-guidelines.csv, icons.csv,
 │   ├── google-fonts.csv, ui-reasoning.csv, react-performance.csv,
-│   ├── app-interface.csv, design.csv, draft.csv
+│   ├── app-interface.csv
 │   ├── _sync_all.py                # Helper to keep colors.csv aligned with products.csv
 │   └── stacks/                     # Per-stack guideline CSVs (16 files)
 ├── scripts/
@@ -157,7 +157,9 @@ src/deps-ai-os/                     # DÉPS AI Operating System — independent 
 │   ├── controles-qa.csv            # 28 contrôles qualité, 19 bloquants
 │   └── nomenclature.csv            # Conventions de nommage des livrables
 ├── scripts/
-│   ├── core.py                     # Chargement CSV, BM25 sans accents, chaînes, doctor()
+│   ├── deps_core.py                # Chargement CSV, BM25 sans accents, chaînes, doctor()
+│   │                               #   (nommé deps_core et non core: les deux moteurs
+│   │                               #   coexistent dans une même exécution pytest)
 │   └── deps.py                     # CLI (route, module, pipeline, params, formule, qa,
 │                                   #   preflight, nomenclature, doctor)
 ├── references/                     # Doctrine par domaine (6 documents)
@@ -177,7 +179,8 @@ src/deps-ai-os/                     # DÉPS AI Operating System — independent 
 └── marketplace.json
 skill.json                          # Cross-assistant skill manifest
 .github/workflows/                  # claude.yml, claude-code-review.yml,
-                                    # python-package-conda.yml (flake8 + pytest)
+                                    # python-ci.yml (flake8 + pytest + deps doctor),
+                                    # cli-sync-check.yml
 docs/, preview/, screenshots/       # Marketing/demo assets — not consumed by code
 ```
 
@@ -219,7 +222,13 @@ Each platform's target folders are defined in `AI_FOLDERS` (e.g. `claude → .cl
 
    You should never see `cli/assets/data/`, `cli/assets/scripts/`, or `cli/assets/templates/` in `git status`. If you do, you've edited the wrong copy — edit `src/ui-ux-pro-max/` instead and re-run sync.
 
-4. **In-repo `.claude/skills/ui-ux-pro-max/SKILL.md`** — this file is pre-rendered output, used to dogfood the skill in this repo. Regenerate it from the templates (e.g. by running `uipro init --ai claude --force` in a scratch dir and copying the result back) rather than hand-editing.
+4. **In-repo `.claude/skills/ui-ux-pro-max/SKILL.md`** — this file is pre-rendered output, used to dogfood the skill in this repo. Never hand-edit it; after changing templates, regenerate it with:
+
+   ```bash
+   node cli/scripts/render-skill.mjs claude --write .claude/skills/ui-ux-pro-max/SKILL.md
+   ```
+
+   CI (`cli-sync-check.yml`) fails if this file drifts from the templates (`render-skill.mjs claude --check`). The script mirrors the substitution rules of `cli/src/utils/template.ts` — keep the two in sync when changing either.
 
    **`.claude/skills/deps-ai-os/SKILL.md` is different**: it is hand-written, not template-rendered, because the DÉPS AI OS is not distributed through the npm CLI. Edit it directly. Its `data`, `scripts` and `references` symlinks point at `src/deps-ai-os/`, so the referential and the engine are edited only there. The DÉPS engine is deliberately **not** mirrored into `cli/assets/` and is not touched by `npm run sync`.
 
@@ -253,8 +262,9 @@ The published package ships `dist/` + `assets/` (see `cli/package.json` `files`)
 
 ## CI
 
-- `.github/workflows/python-package-conda.yml` — runs `flake8` over `src/ui-ux-pro-max/scripts` and `src/deps-ai-os/{scripts,tests}` (syntax errors fail the build; style warnings exit-zero), then `pytest src/deps-ai-os/tests` and `deps.py doctor` (which exits 1 on any referential inconsistency).
-- `.github/workflows/claude.yml`, `claude-code-review.yml` — Claude Code GitHub App workflows.
+- `.github/workflows/python-ci.yml` — on Python 3.10 and 3.12: `flake8` over the whole repo (syntax errors fail the build; style warnings exit-zero), then `pytest` over `tests/` (engine smoke tests + CSV structural validation — every CSV row must match its header's field count), `.claude/skills/ui-styling/scripts/tests` and `src/deps-ai-os/tests`, and finally `deps.py doctor`, which exits 1 on any DÉPS referential inconsistency.
+- `.github/workflows/cli-sync-check.yml` — guards the sync rules: `cli/assets/` subdirs must not be tracked, regenerated assets must mirror `src/ui-ux-pro-max/`, the in-repo SKILL.md must match the templates (`render-skill.mjs claude --check`), and all four manifest versions must be aligned.
+- `.github/workflows/claude.yml`, `claude-code-review.yml` — Claude Code GitHub App workflows (need `CLAUDE_CODE_OAUTH_TOKEN` or `ANTHROPIC_API_KEY` as a repo secret).
 
 ## Git Workflow
 

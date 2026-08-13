@@ -8,6 +8,7 @@ on:
       - 'skill.json'
       - '.claude-plugin/plugin.json'
       - '.claude-plugin/marketplace.json'
+      - '.claude/skills/ui-ux-pro-max/**'
       - '.github/workflows/cli-sync-check.yml'
   pull_request:
     paths:
@@ -16,6 +17,7 @@ on:
       - 'skill.json'
       - '.claude-plugin/plugin.json'
       - '.claude-plugin/marketplace.json'
+      - '.claude/skills/ui-ux-pro-max/**'
       - '.github/workflows/cli-sync-check.yml'
 
 jobs:
@@ -27,6 +29,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: In-repo SKILL.md must match the templates
+        run: node cli/scripts/render-skill.mjs claude --check .claude/skills/ui-ux-pro-max/SKILL.md
 
       - name: cli/assets/ subdirs must not be tracked in git
         run: |

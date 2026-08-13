@@ -20,7 +20,7 @@ import io
 import json
 import sys
 
-from core import (
+from deps_core import (
     DOMAINES,
     REFERENCE_PAR_DOMAINE,
     MAX_RESULTS,
