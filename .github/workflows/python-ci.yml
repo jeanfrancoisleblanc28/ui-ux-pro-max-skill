@@ -38,4 +38,7 @@ jobs:
 
       - name: Run pytest
         run: |
-          pytest tests/ .claude/skills/ui-styling/scripts/tests -v
+          pytest tests/ .claude/skills/ui-styling/scripts/tests src/deps-ai-os/tests -v
+
+      - name: Check the DEPS AI OS referential integrity
+        run: python3 src/deps-ai-os/scripts/deps.py doctor
