@@ -262,3 +262,38 @@ def test_documents_de_reference_presents_pour_chaque_domaine():
         chemin = core.REFERENCES_DIR / fichier
         assert chemin.exists(), "Reference manquante pour %s" % domaine
         assert chemin.stat().st_size > 2000, "Reference trop courte pour %s" % domaine
+
+
+# ============ LISIBILITE DE LA SORTIE ============
+def test_le_routage_resume_les_avertissements_sans_les_noyer():
+    """
+    Un signal repete 22 fois a chaque routage cesse d'etre un signal: le bloc
+    d'avertissements doit rester une fraction minoritaire de la reponse, et
+    dire quel document ouvrir plutot que derouler chaque parametre.
+    """
+    import deps  # noqa: E402
+
+    resultat = core.router("monter un dossier de financement complet pour le comité")
+    assert len(resultat["avertissements"]) > 10, "cas de test devenu non representatif"
+
+    texte = deps.format_route(resultat)
+    lignes = texte.splitlines()
+    bloc = deps._bloc_avertissements(resultat["avertissements"])
+
+    assert len(bloc) < len(lignes) / 3, (
+        "le bloc d'avertissements occupe %d lignes sur %d" % (len(bloc), len(lignes))
+    )
+    # Le compte exact reste annonce, et le chemin vers le detail aussi.
+    rendu = "\n".join(bloc)
+    assert str(len(resultat["avertissements"])) in rendu, "le nombre exact doit rester affiche"
+    assert "params --statut A_VALIDER" in rendu, "le chemin vers le detail doit rester donne"
+
+
+def test_le_json_conserve_tous_les_avertissements():
+    """Le resume est une affaire d'affichage: aucun consommateur ne perd de donnee."""
+    resultat = core.router("monter un dossier de financement complet pour le comité")
+    cles = {avertissement["cle"] for avertissement in resultat["avertissements"]}
+    attendues = {p["Clé"] for p in core.parametres_non_valides()
+                 if set(core.split_list(p["Utilisé par"]))
+                 & {m["ID"] for m in resultat["recommandation"]["sequence"]}}
+    assert cles == attendues

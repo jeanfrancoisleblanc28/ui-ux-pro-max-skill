@@ -64,6 +64,41 @@ def _ligne_module(module):
     return "  %-3s %-28s %-24s" % (module["ID"], module["Domaine"], module["Module"])
 
 
+MAX_CLES_PAR_SOURCE = 4
+
+
+def _bloc_avertissements(avertissements):
+    """
+    Resume les parametres non valides en les groupant par document source.
+
+    Le regroupement par source est la forme actionnable: il dit quel document
+    ouvrir et combien de lignes y renseigner. Derouler les 22 parametres a
+    chaque routage occuperait la moitie de la reponse et entrainerait surtout
+    le lecteur a ne plus lire l'avertissement. Le detail complet reste
+    disponible par `params --statut A_VALIDER` et dans la sortie --json.
+    """
+    if not avertissements:
+        return []
+
+    par_source = {}
+    for parametre in avertissements:
+        par_source.setdefault(parametre["source"], []).append(parametre["cle"])
+
+    out = [_titre("[!] %d PARAMETRES DE POLITIQUE NON VALIDES MOBILISES" % len(avertissements)),
+           "Aucun chiffre qui en depend ne peut etre presente comme definitif (controle C18).",
+           "A renseigner depuis :"]
+    for source in sorted(par_source):
+        cles = sorted(par_source[source])
+        visibles = ", ".join(cles[:MAX_CLES_PAR_SOURCE])
+        reste = len(cles) - MAX_CLES_PAR_SOURCE
+        if reste > 0:
+            visibles += ", +%d autres" % reste
+        out.append("  %2d  %s" % (len(cles), source))
+        out.append("      %s" % visibles)
+    out.append("Liste complete et mise en service : deps.py params --statut A_VALIDER")
+    return out
+
+
 # ============ FORMATAGE ============
 def format_route(resultat):
     out = ["## DEPS AI OS - Routage", 'Demande: "%s"' % resultat["demande"]]
@@ -94,15 +129,7 @@ def format_route(resultat):
         out.append("%2d. %s" % (rang, _ligne_module(module).strip()))
         out.append("    -> %s" % module["Sorties"].split(";")[0].strip())
 
-    avert = resultat["avertissements"]
-    if avert:
-        out.append(_titre("[!] PARAMETRES DE POLITIQUE NON VALIDES MOBILISES (%d)" % len(avert)))
-        out.append("Ces valeurs doivent etre tirees du document en vigueur avant tout chiffrage")
-        out.append("presente. Controle bloquant C18.")
-        for parametre in avert:
-            out.append("  - %-26s %s" % (parametre["cle"], parametre["libelle"]))
-            out.append("    source attendue : %s | modules : %s"
-                       % (parametre["source"], ", ".join(parametre["modules"])))
+    out.extend(_bloc_avertissements(resultat["avertissements"]))
 
     if resultat["pipelines"]:
         out.append(_titre("AUTRES PARCOURS"))
