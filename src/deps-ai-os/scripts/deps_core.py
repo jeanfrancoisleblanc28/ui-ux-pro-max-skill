@@ -53,6 +53,14 @@ ROUTE_COLS_MODULES = ["ID", "Module", "Objectif", "Déclencheurs", "Domaine"]
 ROUTE_COLS_PIPELINES = ["ID", "Pipeline", "Objectif", "Déclencheurs"]
 
 STATUT_A_VALIDER = "A_VALIDER"
+STATUT_VALIDE = "VALIDE"
+STATUT_NON_APPLICABLE = "NON_APPLICABLE"
+STATUTS_PARAMETRE = {STATUT_A_VALIDER, STATUT_VALIDE, STATUT_NON_APPLICABLE}
+
+# Valeur temoin livree avec le referentiel: elle signale une case a remplir,
+# jamais une valeur de politique.
+VALEUR_NON_RENSEIGNEE = "A_RENSEIGNER"
+
 LIST_SEP = ";"
 METHODE_SEP = "|"
 
@@ -203,13 +211,41 @@ def modules_par_domaine(domaine=None):
     return [r for r in rows if cible in strip_accents(r["Domaine"].lower())]
 
 
+def _ordre_topologique(ids, par_id, ordre):
+    """
+    Ordonne un ensemble de modules de sorte qu'aucun ne precede ses dependances
+    amont. A contrainte egale, l'ordre du referentiel tranche, ce qui rend le
+    resultat stable d'une execution a l'autre.
+
+    Trier par position dans le CSV ne suffit pas: F2 declare P1 en amont alors
+    que P1 lui est posterieur dans le fichier. Seul un parcours en profondeur
+    respecte reellement les dependances.
+    """
+    resultat = []
+    etat = {}
+
+    def visiter(module_id):
+        if etat.get(module_id) is not None:
+            return  # deja place, ou en cours de visite (cycle signale par doctor)
+        etat[module_id] = "en_cours"
+        amonts = [a for a in split_list(par_id[module_id]["Amont"]) if a in ids]
+        for amont in sorted(amonts, key=lambda mid: ordre[mid]):
+            visiter(amont)
+        etat[module_id] = "place"
+        resultat.append(module_id)
+
+    for module_id in sorted(ids, key=lambda mid: ordre[mid]):
+        visiter(module_id)
+    return resultat
+
+
 def chaine_modules(identifiant, avec_qa=True):
     """
     Reconstitue la chaine d'execution d'un module: dependances amont d'abord,
     puis le module, puis ses portes de controle qualite.
 
-    L'ordre canonique est celui de modules.csv, ce qui garantit un resultat
-    stable et un ordre de domaine croissant.
+    L'ordre est topologique, pas alphabetique ni positionnel: un module suit
+    toujours ce dont il consomme les sorties.
     """
     rows = load_csv("modules")
     par_id = {r["ID"]: r for r in rows}
@@ -220,28 +256,24 @@ def chaine_modules(identifiant, avec_qa=True):
         return None
 
     requis = set()
-    vus = set()
 
     def descendre(module_id):
-        if module_id in vus or module_id not in par_id:
+        if module_id in requis or module_id not in par_id:
             return
-        vus.add(module_id)
+        requis.add(module_id)
         for amont in split_list(par_id[module_id]["Amont"]):
-            if amont in par_id:
-                requis.add(amont)
-                descendre(amont)
+            descendre(amont)
 
     descendre(cible["ID"])
-    sequence = sorted(requis, key=lambda mid: ordre[mid])
-    sequence.append(cible["ID"])
+    sequence = _ordre_topologique(requis, par_id, ordre)
 
     if avec_qa:
-        gates = []
+        gates = set()
         for module_id in sequence:
             for gate in split_list(par_id[module_id]["Gate QA"]):
-                if gate in par_id and gate not in gates and gate not in sequence:
-                    gates.append(gate)
-        sequence.extend(sorted(gates, key=lambda mid: ordre[mid]))
+                if gate in par_id and gate not in requis:
+                    gates.add(gate)
+        sequence.extend(_ordre_topologique(gates, par_id, ordre))
 
     return [par_id[mid] for mid in sequence]
 
@@ -270,9 +302,39 @@ def parametres(fonds=None, statut=None, module=None):
     return rows
 
 
+def lacunes_parametre(parametre):
+    """
+    Ce qui manque a un parametre marque VALIDE pour l'etre reellement.
+
+    Retourne une liste vide si le parametre est complet. Passer le statut a
+    VALIDE sans renseigner la valeur ni la date suffirait sinon a eteindre
+    l'alerte tout en laissant la case vide: c'est exactement le scenario que
+    l'invariant du systeme doit empecher.
+    """
+    lacunes = []
+    valeur = (parametre.get("Valeur") or "").strip()
+    if not valeur or strip_accents(valeur).upper() == VALEUR_NON_RENSEIGNEE:
+        lacunes.append("valeur non renseignee")
+    if not (parametre.get("Date de validation") or "").strip():
+        lacunes.append("date de validation absente")
+    return lacunes
+
+
+def est_valide(parametre):
+    """Un parametre n'est valide que s'il porte une valeur ET une date."""
+    return parametre["Statut"] == STATUT_VALIDE and not lacunes_parametre(parametre)
+
+
 def parametres_non_valides():
-    """Parametres de politique qui ne peuvent pas alimenter un chiffre presente."""
-    return parametres(statut=STATUT_A_VALIDER)
+    """
+    Parametres de politique qui ne peuvent pas alimenter un chiffre presente.
+
+    Le systeme echoue fermé: tout ce qui n'est pas explicitement valide et
+    complet continue d'alerter. Seul NON_APPLICABLE sort de la liste, parce
+    qu'il declare que le parametre ne s'applique pas.
+    """
+    return [p for p in load_csv("parametres")
+            if p["Statut"] != STATUT_NON_APPLICABLE and not est_valide(p)]
 
 
 def formules(module=None, recherche=None):
@@ -434,32 +496,75 @@ def _verifier_modules(modules, ids):
     return anomalies
 
 
-def _verifier_pipelines(ids):
-    """Chaque parcours doit mobiliser des modules existants et se refermer sur le preflight."""
+def _verifier_pipelines(modules, ids):
+    """
+    Chaque parcours doit mobiliser des modules existants, respecter les
+    dependances declarees et se refermer sur le preflight.
+
+    La regle d'ordre ne porte que sur les modules effectivement presents dans
+    la sequence: un parcours peut deliberement omettre une dependance (le
+    diagnostic express saute le montage financier), mais s'il la mobilise,
+    elle doit venir avant ce qui la consomme.
+    """
     anomalies = []
+    par_id = {row["ID"]: row for row in modules}
     for row in load_csv("pipelines"):
         etapes = split_list(row["Séquence"])
         if not etapes:
             anomalies.append("Pipeline %s: sequence vide" % row["ID"])
             continue
+        inconnus = [ref for ref in etapes if ref not in ids]
+        for ref in inconnus:
+            anomalies.append("Pipeline %s: sequence reference un module inexistant '%s'"
+                             % (row["ID"], ref))
+        if inconnus:
+            continue
+        rang = {ref: i for i, ref in enumerate(etapes)}
         for ref in etapes:
-            if ref not in ids:
-                anomalies.append("Pipeline %s: sequence reference un module inexistant '%s'"
-                                 % (row["ID"], ref))
+            for amont in split_list(par_id[ref]["Amont"]):
+                if amont in rang and rang[amont] > rang[ref]:
+                    anomalies.append(
+                        "Pipeline %s: %s (etape %d) depend de %s place en etape %d"
+                        % (row["ID"], ref, rang[ref] + 1, amont, rang[amont] + 1))
         if etapes[-1] != "Q4":
             anomalies.append("Pipeline %s: ne se referme pas sur le preflight Q4" % row["ID"])
+    return anomalies
+
+
+def _verifier_absence_de_cycle(modules, ids):
+    """Un cycle dans les dependances rendrait toute chaine d'execution impossible."""
+    par_id = {row["ID"]: row for row in modules}
+    etat = {}
+    anomalies = []
+
+    def visiter(module_id, pile):
+        if etat.get(module_id) == "place":
+            return
+        if module_id in pile:
+            boucle = pile[pile.index(module_id):] + [module_id]
+            anomalies.append("Cycle de dependances: %s" % " -> ".join(boucle))
+            return
+        for amont in split_list(par_id[module_id]["Amont"]):
+            if amont in ids:
+                visiter(amont, pile + [module_id])
+        etat[module_id] = "place"
+
+    for module_id in sorted(ids):
+        visiter(module_id, [])
     return anomalies
 
 
 def _verifier_parametres(ids):
     """Statuts connus, modules utilisateurs valides, source declaree."""
     anomalies = []
-    statuts_valides = {STATUT_A_VALIDER, "VALIDE", "NON_APPLICABLE"}
     for row in load_csv("parametres"):
-        if row["Statut"] not in statuts_valides:
+        if row["Statut"] not in STATUTS_PARAMETRE:
             anomalies.append("Parametre %s: statut inconnu '%s'" % (row["Clé"], row["Statut"]))
         if not row["Source"].strip():
             anomalies.append("Parametre %s: source attendue non declaree" % row["Clé"])
+        if row["Statut"] == STATUT_VALIDE:
+            for lacune in lacunes_parametre(row):
+                anomalies.append("Parametre %s: declare VALIDE mais %s" % (row["Clé"], lacune))
         for ref in split_list(row["Utilisé par"]):
             if ref not in ids:
                 anomalies.append("Parametre %s: utilise par un module inexistant '%s'"
@@ -526,7 +631,8 @@ def doctor():
 
     anomalies = []
     anomalies.extend(_verifier_modules(modules, ids))
-    anomalies.extend(_verifier_pipelines(ids))
+    anomalies.extend(_verifier_absence_de_cycle(modules, ids))
+    anomalies.extend(_verifier_pipelines(modules, ids))
     anomalies.extend(_verifier_parametres(ids))
     anomalies.extend(_verifier_formules(ids))
     anomalies.extend(_verifier_controles(ids))

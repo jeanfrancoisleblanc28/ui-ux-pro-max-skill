@@ -67,14 +67,14 @@ DÉPS AI OPERATING SYSTEM
 
 | Parcours | Pour | Séquence |
 |---|---|---|
-| `dossier-cic` | Dossier de financement complet jusqu'au comité | P1 → F1 → F3 → F4 → P3 → P2 → F2 → P4 → QA |
+| `dossier-cic` | Dossier de financement complet jusqu'au comité | P1 → F1 → F2 → F3 → F4 → P2 → P3 → P4 → QA |
 | `evaluation-entreprise` | Combien vaut l'entreprise | E1 → E2 → E3 → E4 → QA |
 | `diagnostic-express` | Portrait rapide, triage, pré-analyse | F1 → F3 → D2 → R2 → QA |
-| `veille-territoriale` | Lecture stratégique du territoire | D3 → D2 → D1 → R2 → QA |
+| `veille-territoriale` | Lecture stratégique du territoire | D2 → D3 → D1 → R2 → QA |
 | `presentation-decision` | Mettre en scène un livrable validé | R2 → R3 → R1 → QA |
 | `recherche-financement` | Cartographier les sources et monter le financement | P1 → D1 → F2 → F3 → QA |
 | `controle-qualite` | Vérifier un livrable déjà rédigé, même écrit à la main | Q1 → Q3 → Q2 → Q4 |
-| `contre-analyse` | Second regard qui recalcule avant de commenter | Q1 → F4 → F3 → Q3 → Q4 |
+| `contre-analyse` | Second regard qui recalcule avant de commenter | F3 → F4 → Q1 → Q3 → Q4 |
 
 ## Règles non négociables
 
@@ -101,6 +101,8 @@ python3 .claude/skills/deps-ai-os/scripts/deps.py params --statut A_VALIDER
 ```
 
 Ouvrez la politique d'investissement en vigueur et remplissez, pour chaque paramètre, la valeur, la source précise et la date de validation, puis passez le statut à `VALIDE`. Le fichier à éditer est `src/deps-ai-os/data/parametres-politique.csv`.
+
+Le système échoue fermé : passer le statut à `VALIDE` sans renseigner la valeur et la date n'éteint pas l'alerte — le paramètre continue d'être signalé, et `doctor` le nomme. Il n'existe donc aucun moyen de faire taire un avertissement autrement qu'en renseignant réellement la donnée.
 
 Tant que ce travail n'est pas fait, le système reste utilisable : il signale simplement, à chaque routage et à chaque préflight, quels chiffres demeurent provisoires.
 

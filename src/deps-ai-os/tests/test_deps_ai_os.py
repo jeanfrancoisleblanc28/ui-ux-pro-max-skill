@@ -297,3 +297,125 @@ def test_le_json_conserve_tous_les_avertissements():
                  if set(core.split_list(p["Utilisé par"]))
                  & {m["ID"] for m in resultat["recommandation"]["sequence"]}}
     assert cles == attendues
+
+
+# ============ ORDRE D'EXECUTION ============
+def _violations_d_ordre(sequence, par_id):
+    """Dependances declarees qui apparaissent apres ce qui les consomme."""
+    rang = {mid: i for i, mid in enumerate(sequence)}
+    return [(mid, amont) for mid in sequence
+            for amont in core.split_list(par_id[mid]["Amont"])
+            if amont in rang and rang[amont] > rang[mid]]
+
+
+def test_toutes_les_chaines_respectent_les_dependances():
+    """
+    Trier par position dans le CSV n'est pas un tri topologique: F2 declare P1
+    en amont alors que P1 lui est posterieur dans le fichier. La chaine doit
+    respecter les dependances, pas l'ordre du fichier.
+    """
+    par_id = {m["ID"]: m for m in core.load_csv("modules")}
+    fautives = []
+    for module_id in par_id:
+        for avec_qa in (False, True):
+            sequence = [m["ID"] for m in core.chaine_modules(module_id, avec_qa=avec_qa)]
+            for mid, amont in _violations_d_ordre(sequence, par_id):
+                fautives.append("chaine(%s, qa=%s): %s precede son amont %s"
+                                % (module_id, avec_qa, mid, amont))
+    assert fautives == [], "\n".join(fautives)
+
+
+def test_la_chaine_place_p1_avant_f2():
+    """Cas concret du defaut: le montage financier consomme l'admissibilite."""
+    sequence = [m["ID"] for m in core.chaine_modules("F3", avec_qa=False)]
+    assert sequence.index("P1") < sequence.index("F2")
+
+
+def test_tous_les_pipelines_respectent_les_dependances():
+    """
+    Un parcours peut omettre une dependance (le diagnostic express saute le
+    montage), mais s'il la mobilise, elle doit preceder ce qui la consomme.
+    """
+    par_id = {m["ID"]: m for m in core.load_csv("modules")}
+    fautifs = []
+    for pipeline in core.load_csv("pipelines"):
+        sequence = core.split_list(pipeline["Séquence"])
+        for mid, amont in _violations_d_ordre(sequence, par_id):
+            fautifs.append("%s: %s precede son amont %s" % (pipeline["ID"], mid, amont))
+    assert fautifs == [], "\n".join(fautifs)
+
+
+def test_les_dependances_ne_forment_pas_de_cycle():
+    assert [a for a in core.doctor() if "Cycle" in a] == []
+
+
+# ============ INVARIANT DE VALIDATION DES PARAMETRES ============
+def test_un_parametre_valide_mais_vide_n_est_pas_valide():
+    """
+    Passer un statut a VALIDE sans renseigner la valeur eteindrait l'alerte
+    tout en laissant la case vide. Le systeme doit echouer ferme.
+    """
+    incomplet = {"Clé": "TEST", "Statut": "VALIDE",
+                 "Valeur": "À_RENSEIGNER", "Date de validation": ""}
+    assert not core.est_valide(incomplet)
+    assert core.lacunes_parametre(incomplet) == [
+        "valeur non renseignee", "date de validation absente",
+    ]
+
+
+def test_un_parametre_valide_sans_date_n_est_pas_valide():
+    sans_date = {"Clé": "TEST", "Statut": "VALIDE",
+                 "Valeur": "150 000 $", "Date de validation": "  "}
+    assert not core.est_valide(sans_date)
+
+
+def test_un_parametre_complet_est_valide():
+    complet = {"Clé": "TEST", "Statut": "VALIDE",
+               "Valeur": "150 000 $", "Date de validation": "2026-01-15"}
+    assert core.est_valide(complet)
+    assert core.lacunes_parametre(complet) == []
+
+
+def _referentiel_avec_parametre_force(tmp_path, cle, statut):
+    """Copie le referentiel en forcant le statut d'un parametre, sans y toucher."""
+    import csv as csv_module
+
+    rows = list(csv_module.DictReader(
+        open(core.DATA_DIR / core.FILES["parametres"], encoding="utf-8")))
+    for row in rows:
+        if row["Clé"] == cle:
+            row["Statut"] = statut
+    dossier = tmp_path / "data"
+    dossier.mkdir()
+    for fichier in core.FILES.values():
+        (dossier / fichier).write_bytes((core.DATA_DIR / fichier).read_bytes())
+    with open(dossier / core.FILES["parametres"], "w", encoding="utf-8", newline="") as handle:
+        writer = csv_module.DictWriter(handle, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    return dossier
+
+
+def test_doctor_signale_un_valide_incomplet(tmp_path, monkeypatch):
+    """Le controle d'integrite doit nommer un parametre declare valide a tort."""
+    dossier = _referentiel_avec_parametre_force(tmp_path, "PLAFOND_ENTREPRISE_FLI", "VALIDE")
+    monkeypatch.setattr(core, "DATA_DIR", dossier)
+    anomalies = [a for a in core.doctor() if "VALIDE" in a]
+    assert anomalies, "un parametre declare VALIDE sans valeur doit etre signale"
+    assert any("PLAFOND_ENTREPRISE_FLI" in a for a in anomalies)
+
+
+def test_un_parametre_valide_a_tort_continue_d_alerter(tmp_path, monkeypatch):
+    """Il doit rester dans les avertissements de routage et de preflight."""
+    dossier = _referentiel_avec_parametre_force(tmp_path, "PLAFOND_ENTREPRISE_FLI", "VALIDE")
+    monkeypatch.setattr(core, "DATA_DIR", dossier)
+    cles = {p["Clé"] for p in core.parametres_non_valides()}
+    assert "PLAFOND_ENTREPRISE_FLI" in cles
+
+
+def test_un_parametre_non_applicable_sort_des_alertes():
+    """NON_APPLICABLE declare que le parametre ne s'applique pas: pas une lacune."""
+    non_applicable = {"Clé": "TEST", "Statut": "NON_APPLICABLE",
+                      "Valeur": "À_RENSEIGNER", "Date de validation": ""}
+    assert not core.est_valide(non_applicable)
+    assert core.STATUT_NON_APPLICABLE in core.STATUTS_PARAMETRE
