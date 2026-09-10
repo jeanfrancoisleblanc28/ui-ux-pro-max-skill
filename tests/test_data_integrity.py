@@ -64,3 +64,28 @@ def test_no_untranslated_cjk(path):
         if CJK.search(line)
     ]
     assert not hits, f"{path.name}: CJK text remains at {hits[:5]}"
+
+
+CHECKLIST_MARK = "☐"
+
+# Columns that carry checklist items legitimately. Anywhere else, a checklist
+# mark means a delimiter or quote went missing and the item leaked into the
+# neighbouring column — a field-count check cannot see this, because the row
+# still has the right number of fields.
+CHECKLIST_COLUMNS = {"Implementation Checklist"}
+
+
+@pytest.mark.parametrize("path", ALL_CSVS, ids=lambda p: str(p.relative_to(DATA)))
+def test_checklist_items_stay_in_their_column(path):
+    with open(path, newline="", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    leaks = [
+        (i, (row.get("Style Category") or row.get("Product Type") or "?"), column)
+        for i, row in enumerate(rows, start=2)
+        for column, value in row.items()
+        if column not in CHECKLIST_COLUMNS and CHECKLIST_MARK in (value or "")
+    ]
+    assert not leaks, (
+        f"{path.name}: checklist item found outside {sorted(CHECKLIST_COLUMNS)} "
+        f"(missing delimiter or quote): {leaks[:5]}"
+    )
