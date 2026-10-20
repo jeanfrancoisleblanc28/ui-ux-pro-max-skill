@@ -71,6 +71,7 @@ node scripts/validate-tokens.cjs --dir src/
 | Component Specs | `references/component-specs.md` |
 | States & Variants | `references/states-and-variants.md` |
 | Tailwind Integration | `references/tailwind-integration.md` |
+| **Premium Presentation Standards** | `references/premium-presentation-standards.md` |
 
 ## Component Spec Pattern
 
@@ -109,6 +110,8 @@ node scripts/validate-tokens.cjs --dir src/
 
 Brand-compliant presentations using design tokens + Chart.js + contextual decision system.
 
+**For top-tier quality (Pentagram / McKinsey / IDEO level):** Load and apply `references/premium-presentation-standards.md`.
+
 ### Source of Truth
 
 | File | Purpose |
@@ -117,6 +120,7 @@ Brand-compliant presentations using design tokens + Chart.js + contextual decisi
 | `assets/design-tokens.json` | Token definitions (primitive→semantic→component) |
 | `assets/design-tokens.css` | CSS variables (import in slides) |
 | `assets/css/slide-animations.css` | CSS animation library |
+| `references/premium-presentation-standards.md` | Restraint, narrative clarity, and visual discipline standards |
 
 ### Slide Search (BM25)
 
@@ -183,6 +187,7 @@ System calculates pattern breaks at 1/3 and 2/3 positions.
 4. Include navigation (keyboard arrows, click, progress bar)
 5. Center align content
 6. Focus on persuasion/conversion
+7. Follow restraint and narrative principles in `premium-presentation-standards.md` when producing high-stakes decks
 
 ### Chart.js Integration
 
@@ -242,3 +247,4 @@ assets/designs/slides/claudekit-pitch-251223.html
 4. Use HSL format for opacity control
 5. Document every token's purpose
 6. **Slides must import design-tokens.css and use var() exclusively**
+7. For executive or territorial decks, apply the premium standards (one idea per slide, generous whitespace, annotated insights)
