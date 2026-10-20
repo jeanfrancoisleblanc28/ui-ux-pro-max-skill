@@ -22,7 +22,12 @@
     overflow: hidden;
     height: 100vh;
   }
-  .deck { height: 100vh; position: relative; perspective: 1200px; }
+  .deck {
+    height: 100vh;
+    position: relative;
+    perspective: 800px;
+    perspective-origin: center center;
+  }
   .slide {
     position: absolute;
     inset: 0;
@@ -32,54 +37,65 @@
     padding: 6vw 8vw;
     background: var(--surface);
     transform-style: preserve-3d;
-    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s;
+    transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s;
     opacity: 0;
+    backface-visibility: hidden;
   }
   .slide.active {
     display: flex;
     opacity: 1;
-    transform: translateZ(0) rotateY(0deg);
+    transform: translateZ(60px) rotateY(0deg) rotateX(0deg);
   }
-  .slide.prev { transform: translateX(-30px) rotateY(8deg) translateZ(-40px); }
-  .slide.next { transform: translateX(30px) rotateY(-8deg) translateZ(-40px); }
-  h1 { font-size: clamp(2.8rem, 5vw, 4.5rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; max-width: 18ch; }
-  h2 { font-size: clamp(1.6rem, 2.8vw, 2.4rem); font-weight: 500; margin-bottom: 1.5rem; letter-spacing: -0.02em; }
+  .slide.prev {
+    transform: translateX(-80px) rotateY(22deg) rotateX(-4deg) translateZ(-120px);
+  }
+  .slide.next {
+    transform: translateX(80px) rotateY(-22deg) rotateX(4deg) translateZ(-120px);
+  }
+  h1 { font-size: clamp(2.8rem, 5vw, 4.5rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; max-width: 18ch; transform: translateZ(30px); }
+  h2 { font-size: clamp(1.6rem, 2.8vw, 2.4rem); font-weight: 500; margin-bottom: 1.5rem; letter-spacing: -0.02em; transform: translateZ(20px); }
   p, li { font-size: 1.15rem; line-height: 1.5; color: var(--muted); max-width: 62ch; }
-  .kicker { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 1rem; }
+  .kicker { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 1rem; transform: translateZ(10px); }
   .metric { font-size: 3.5rem; font-weight: 600; color: var(--accent-2); letter-spacing: -0.04em; }
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
   .card {
-    background: rgba(255,255,255,0.03);
+    background: rgba(255,255,255,0.04);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.5rem;
-    transform: translateZ(20px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    transition: transform 0.3s;
+    border-radius: 16px;
+    padding: 1.75rem;
+    transform: translateZ(50px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.05);
+    transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s;
+    backdrop-filter: blur(8px);
   }
-  .card:hover { transform: translateZ(40px) translateY(-4px); }
+  .card:hover {
+    transform: translateZ(90px) translateY(-8px) rotateX(4deg);
+    box-shadow: 0 30px 70px rgba(0,0,0,0.6);
+  }
   .nav {
     position: fixed;
     bottom: 2rem;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateZ(100px);
     display: flex;
     gap: 0.5rem;
     z-index: 10;
   }
   .dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: rgba(255,255,255,0.2);
+    width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(255,255,255,0.25);
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.2s;
   }
-  .dot.active { background: var(--accent); }
+  .dot:hover { transform: scale(1.4) translateZ(20px); }
+  .dot.active { background: var(--accent); transform: scale(1.2); }
   .progress {
     position: fixed;
-    top: 0; left: 0; height: 3px;
-    background: var(--accent);
-    transition: width 0.3s;
+    top: 0; left: 0; height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transition: width 0.35s;
     z-index: 10;
+    box-shadow: 0 0 20px var(--accent);
   }
 </style>
 </head>
