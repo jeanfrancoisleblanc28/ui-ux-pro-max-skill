@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cartographie Densité — MRC Drummond | Commissaire Industriel</title>
+<style>
+  :root {
+    --bg: #0a0e17;
+    --surface: #141a28;
+    --text: #f0f4f8;
+    --muted: #8b9bb4;
+    --accent: #3b82f6;
+    --accent-2: #10b981;
+    --accent-3: #f59e0b;
+    --border: rgba(255,255,255,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+  }
+  .deck {
+    height: 100vh;
+    position: relative;
+    perspective: 800px;
+    perspective-origin: center center;
+  }
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6vw 8vw;
+    background: var(--surface);
+    transform-style: preserve-3d;
+    transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s;
+    opacity: 0;
+    backface-visibility: hidden;
+  }
+  .slide.active {
+    display: flex;
+    opacity: 1;
+    transform: translateZ(60px) rotateY(0deg) rotateX(0deg);
+  }
+  .slide.prev {
+    transform: translateX(-80px) rotateY(22deg) rotateX(-4deg) translateZ(-120px);
+  }
+  .slide.next {
+    transform: translateX(80px) rotateY(-22deg) rotateX(4deg) translateZ(-120px);
+  }
+  h1 { font-size: clamp(2.6rem, 4.8vw, 4.2rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; max-width: 20ch; transform: translateZ(30px); }
+  h2 { font-size: clamp(1.5rem, 2.6vw, 2.2rem); font-weight: 500; margin-bottom: 1.5rem; letter-spacing: -0.02em; transform: translateZ(20px); }
+  p, li { font-size: 1.15rem; line-height: 1.5; color: var(--muted); max-width: 62ch; }
+  .kicker { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 1rem; transform: translateZ(10px); }
+  .metric { font-size: 3.5rem; font-weight: 600; color: var(--accent-2); letter-spacing: -0.04em; }
+  .grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; align-items: center; }
+  .card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem;
+    transform: translateZ(50px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.05);
+    transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s;
+    backdrop-filter: blur(8px);
+  }
+  .card:hover {
+    transform: translateZ(90px) translateY(-8px) rotateX(4deg);
+    box-shadow: 0 30px 70px rgba(0,0,0,0.6);
+  }
+  .nav {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateZ(100px);
+    display: flex;
+    gap: 0.5rem;
+    z-index: 10;
+  }
+  .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .dot:hover { transform: scale(1.4) translateZ(20px); }
+  .dot.active { background: var(--accent); transform: scale(1.2); }
+  .progress {
+    position: fixed;
+    top: 0; left: 0; height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transition: width 0.35s;
+    z-index: 10;
+    box-shadow: 0 0 20px var(--accent);
+  }
+  ul { list-style: none; }
+  li { margin-bottom: 0.6rem; }
+  .map-container { position: relative; width: 100%; height: 420px; background: rgba(0,0,0,0.2); border-radius: 16px; overflow: hidden; }
+  svg { width: 100%; height: 100%; }
+  .pole { fill: #1e3a5f; stroke: #3b82f6; stroke-width: 2; cursor: pointer; transition: all 0.3s; }
+  .pole:hover { fill: #3b82f6; filter: drop-shadow(0 0 12px #3b82f6); }
+  .label { font-size: 11px; fill: #f0f4f8; font-weight: 500; }
+  .annotation { position: absolute; background: rgba(20,26,40,0.9); border: 1px solid var(--accent); padding: 0.8rem; border-radius: 8px; font-size: 0.85rem; max-width: 220px; backdrop-filter: blur(6px); }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck">
+
+  <!-- 1. Title -->
+  <section class="slide active">
+    <div class="kicker">Cartographie stratégique</div>
+    <h1>Densité d’entreprises<br>et leviers d’agglomération<br>MRC Drummond</h1>
+    <p style="margin-top:1.5rem">Outil de lecture territoriale pour le commissaire industriel.</p>
+  </section>
+
+  <!-- 2. Portrait densité -->
+  <section class="slide">
+    <div class="kicker">01 — Masse critique</div>
+    <div class="grid">
+      <div>
+        <h2>Un tissu industriel dense et diversifié</h2>
+        <p>Environ 562 à 572 entreprises manufacturières et plus de 17 000 emplois. La concentration crée des effets d’agglomération mesurables.</p>
+      </div>
+      <div class="card">
+        <div class="metric">~570</div>
+        <p>entreprises manufacturières</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Carte stylisée -->
+  <section class="slide">
+    <div class="kicker">02 — Cartographie des pôles</div>
+    <h2>12 pôles industriels — densité relative</h2>
+    <div class="map-container" style="margin-top:1.5rem;">
+      <svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+        <!-- Fond stylisé MRC -->
+        <rect width="800" height="400" fill="#0f172a"/>
+        <!-- Axes autoroutes -->
+        <line x1="100" y1="200" x2="700" y2="200" stroke="#334155" stroke-width="4"/>
+        <line x1="400" y1="50" x2="400" y2="350" stroke="#334155" stroke-width="4"/>
+        <text x="720" y="210" class="label">A20</text>
+        <text x="410" y="40" class="label">A55</text>
+        
+        <!-- Pôles principaux (taille relative à superficie) -->
+        <circle class="pole" cx="320" cy="180" r="48" data-name="Parc régional"/>
+        <text x="320" y="185" class="label" text-anchor="middle">Parc régional</text>
+        
+        <circle class="pole" cx="380" cy="210" r="32" data-name="Parc municipal"/>
+        <text x="380" y="215" class="label" text-anchor="middle">Municipal</text>
+        
+        <circle class="pole" cx="280" cy="160" r="38" data-name="Vitrine 20"/>
+        <text x="280" y="165" class="label" text-anchor="middle">Vitrine 20</text>
+        
+        <circle class="pole" cx="450" cy="240" r="28" data-name="Vitrine 55"/>
+        <text x="450" y="245" class="label" text-anchor="middle">Vitrine 55</text>
+        
+        <circle class="pole" cx="220" cy="220" r="18" data-name="Saint-Charles"/>
+        <text x="220" y="225" class="label" text-anchor="middle">St-Charles</text>
+        
+        <circle class="pole" cx="500" cy="160" r="16" data-name="Écoparc"/>
+        <text x="500" y="165" class="label" text-anchor="middle">Écoparc</text>
+        
+        <!-- Autres pôles plus petits -->
+        <circle class="pole" cx="350" cy="280" r="14"/>
+        <circle class="pole" cx="180" cy="280" r="12"/>
+        <circle class="pole" cx="550" cy="280" r="13"/>
+      </svg>
+      <div class="annotation" style="top:40px; left:40px;">
+        <strong>Parc régional</strong><br>4,2 M m² — plus grande masse critique
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Avantages agglomération -->
+  <section class="slide">
+    <div class="kicker">03 — Leviers de densité</div>
+    <h2>Avantages de la concentration pour le commissaire</h2>
+    <div class="grid" style="grid-template-columns: 1fr 1fr; margin-top:1.5rem;">
+      <div class="card">
+        <p><strong>Productivité</strong><br>Spillovers, fournisseurs spécialisés et bassin de main-d’œuvre partagé.</p>
+      </div>
+      <div class="card">
+        <p><strong>Infrastructures</strong><br>Meilleure utilisation des réseaux existants. Crédit de taxes 100 % pour densifier.</p>
+      </div>
+      <div class="card">
+        <p><strong>Attractivité</strong><br>Signal de masse critique pour investisseurs et talents.</p>
+      </div>
+      <div class="card">
+        <p><strong>Symbiose</strong><br>Économie circulaire et écoparcs facilités par la proximité.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Insight stratégique -->
+  <section class="slide">
+    <div class="kicker">04 — Implication</div>
+    <div class="grid">
+      <div>
+        <h2>Prioriser la densification des pôles existants</h2>
+        <p>La densité transforme des parcs en écosystème. Elle multiplie l’effet de levier sur l’attraction, la productivité et les alliances inter-MRC tout en optimisant les investissements publics.</p>
+      </div>
+      <div class="card">
+        <p><strong>Claim</strong> — Densifier avant d’étendre<br><strong>Evidence</strong> — 379 entreprises à Drummondville, crédit fiscal densification<br><strong>Implication</strong> — ROI territorial plus élevé et arguments plus forts auprès des élus</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Actions -->
+  <section class="slide">
+    <div class="kicker">Prochaines étapes</div>
+    <h2>Utiliser la cartographie comme outil opérationnel</h2>
+    <ul>
+      <li>• Identifier les pôles à densifier en priorité (disponibilité + infrastructures)</li>
+      <li>• Annoter les zones de symbiose potentielle (écoparcs, fournisseurs)</li>
+      <li>• Suivre la densité (entreprises/ha, emplois/ha) comme KPI</li>
+      <li>• Intégrer dans les présentations aux élus et partenaires inter-MRC</li>
+    </ul>
+  </section>
+
+</div>
+
+<div class="nav" id="nav"></div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const nav = document.getElementById('nav');
+const progress = document.getElementById('progress');
+let current = 0;
+
+slides.forEach((_, i) => {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  nav.appendChild(d);
+});
+
+function goTo(n) {
+  slides[current].classList.remove('active');
+  slides[current].classList.add(n > current ? 'prev' : 'next');
+  current = n;
+  slides[current].classList.remove('prev', 'next');
+  slides[current].classList.add('active');
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+  progress.style.width = ((current + 1) / slides.length * 100) + '%';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' && current < slides.length - 1) goTo(current + 1);
+  if (e.key === 'ArrowLeft' && current > 0) goTo(current - 1);
+});
+
+progress.style.width = (1 / slides.length * 100) + '%';
+</script>
+</body>
+</html>
