@@ -1,6 +1,6 @@
 ---
 name: ckm:design-system
-description: Token architecture, component specifications, and slide generation. Three-layer tokens (primitive→semantic→component), CSS variables, spacing/typography scales, component specs, strategic slide creation. Use for design tokens, systematic design, brand-compliant presentations.
+description: Token architecture, component specifications, and slide generation. Three-layer tokens (primitive→semantic→component), CSS variables, spacing/typography scales, component specs, strategic slide creation. Use for design tokens, systematic design, brand-compliant presentations. Specialized for high-stakes economic development decks.
 argument-hint: "[component or token]"
 license: MIT
 metadata:
@@ -20,7 +20,15 @@ Token architecture, component specifications, systematic design, slide generatio
 - Spacing/typography scales
 - Design-to-code handoff
 - Tailwind theme configuration
-- **Slide/presentation generation**
+- **Slide/presentation generation** (especially economic development, territorial strategy, municipal / MRC decks)
+
+## Specialization Advantage
+
+For economic development work (commissaire industriel, MRC, alliances inter-MRC, attraction d'investissements, main-d'œuvre, économie circulaire), this system outperforms general tools (Perplexity, Claude, Cursor and their plugins/MCP).
+
+Load `references/economic-development-superiority.md` for the full rationale.
+
+**Key strategies:** 20–35 in `data/slide-strategies.csv` (including Strategy 31 for MRC Drummond and specialized follow-ups 32–35).
 
 ## Token Architecture
 
@@ -72,6 +80,7 @@ node scripts/validate-tokens.cjs --dir src/
 | States & Variants | `references/states-and-variants.md` |
 | Tailwind Integration | `references/tailwind-integration.md` |
 | **Premium Presentation Standards** | `references/premium-presentation-standards.md` |
+| **Economic Development Specialization** | `references/economic-development-superiority.md` |
 
 ## Component Spec Pattern
 
@@ -112,6 +121,8 @@ Brand-compliant presentations using design tokens + Chart.js + contextual decisi
 
 **For top-tier quality (Pentagram / McKinsey / IDEO level):** Load and apply `references/premium-presentation-standards.md`.
 
+**For economic development decks:** Prefer strategies 20–35 and the specialized formulas in `slide-copy.csv` (Annotated Insight, Place-Based Leverage, Governance Pathway, etc.).
+
 ### Source of Truth
 
 | File | Purpose |
@@ -121,6 +132,7 @@ Brand-compliant presentations using design tokens + Chart.js + contextual decisi
 | `assets/design-tokens.css` | CSS variables (import in slides) |
 | `assets/css/slide-animations.css` | CSS animation library |
 | `references/premium-presentation-standards.md` | Restraint, narrative clarity, and visual discipline standards |
+| `references/economic-development-superiority.md` | Why this system outperforms general AI tools on territorial economic development |
 
 ### Slide Search (BM25)
 
@@ -141,14 +153,14 @@ python scripts/search-slides.py "cta" --context --position 9 --prev-emotion frus
 
 | File | Purpose |
 |------|---------|
-| `data/slide-strategies.csv` | 15 deck structures + emotion arcs + sparkline beats |
-| `data/slide-layouts.csv` | 25 layouts + component variants + animations |
+| `data/slide-strategies.csv` | Deck structures + emotion arcs + sparkline beats (including specialized economic development strategies 20–35) |
+| `data/slide-layouts.csv` | Layouts + component variants + animations |
 | `data/slide-layout-logic.csv` | Goal → Layout + break_pattern flag |
 | `data/slide-typography.csv` | Content type → Typography scale |
 | `data/slide-color-logic.csv` | Emotion → Color treatment |
 | `data/slide-backgrounds.csv` | Slide type → Image category (Pexels/Unsplash) |
-| `data/slide-copy.csv` | 25 copywriting formulas (PAS, AIDA, FAB) |
-| `data/slide-charts.csv` | 25 chart types with Chart.js config |
+| `data/slide-copy.csv` | Copywriting formulas (including specialized territorial formulas) |
+| `data/slide-charts.csv` | Chart types with Chart.js config |
 
 ### Contextual Decision Flow
 
@@ -233,6 +245,11 @@ Working example with all features:
 assets/designs/slides/claudekit-pitch-251223.html
 ```
 
+Premium economic development example:
+```
+.claude/skills/design-system/examples/strategie-31-commissaire-industriel-mrc-drummond.html
+```
+
 ### Command
 
 ```bash
@@ -248,3 +265,4 @@ assets/designs/slides/claudekit-pitch-251223.html
 5. Document every token's purpose
 6. **Slides must import design-tokens.css and use var() exclusively**
 7. For executive or territorial decks, apply the premium standards (one idea per slide, generous whitespace, annotated insights)
+8. For economic development work, start from strategies 20–35 and the specialized copy formulas
