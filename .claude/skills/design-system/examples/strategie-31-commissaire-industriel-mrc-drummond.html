@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stratégie Commissaire Industriel — MRC Drummond</title>
+<style>
+  :root {
+    --bg: #0a0e17;
+    --surface: #141a28;
+    --text: #f0f4f8;
+    --muted: #8b9bb4;
+    --accent: #3b82f6;
+    --accent-2: #10b981;
+    --border: rgba(255,255,255,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+  }
+  .deck { height: 100vh; position: relative; perspective: 1200px; }
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6vw 8vw;
+    background: var(--surface);
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s;
+    opacity: 0;
+  }
+  .slide.active {
+    display: flex;
+    opacity: 1;
+    transform: translateZ(0) rotateY(0deg);
+  }
+  .slide.prev { transform: translateX(-30px) rotateY(8deg) translateZ(-40px); }
+  .slide.next { transform: translateX(30px) rotateY(-8deg) translateZ(-40px); }
+  h1 { font-size: clamp(2.8rem, 5vw, 4.5rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; max-width: 18ch; }
+  h2 { font-size: clamp(1.6rem, 2.8vw, 2.4rem); font-weight: 500; margin-bottom: 1.5rem; letter-spacing: -0.02em; }
+  p, li { font-size: 1.15rem; line-height: 1.5; color: var(--muted); max-width: 62ch; }
+  .kicker { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 1rem; }
+  .metric { font-size: 3.5rem; font-weight: 600; color: var(--accent-2); letter-spacing: -0.04em; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+  .card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transform: translateZ(20px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transition: transform 0.3s;
+  }
+  .card:hover { transform: translateZ(40px) translateY(-4px); }
+  .nav {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+    z-index: 10;
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .dot.active { background: var(--accent); }
+  .progress {
+    position: fixed;
+    top: 0; left: 0; height: 3px;
+    background: var(--accent);
+    transition: width 0.3s;
+    z-index: 10;
+  }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck">
+
+  <!-- 1. Title -->
+  <section class="slide active">
+    <div class="kicker">Stratégie — Commissaire industriel</div>
+    <h1>MRC Drummond<br>Feuille de route industrielle</h1>
+    <p style="margin-top:1.5rem">Ancrée dans le territoire, le contexte macroéconomique et les alliances régionales.</p>
+  </section>
+
+  <!-- 2. Portrait territorial -->
+  <section class="slide">
+    <div class="kicker">01 — Portrait territorial</div>
+    <div class="grid">
+      <div>
+        <h2>Pôle manufacturier au cœur du Québec</h2>
+        <p>Position stratégique sur les autoroutes 20 et 55. Accès rapide à Montréal, Québec et aux États-Unis. Base industrielle diversifiée et infrastructures consolidées.</p>
+      </div>
+      <div class="card">
+        <div class="metric">~570</div>
+        <p>entreprises manufacturières</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Contexte macro -->
+  <section class="slide">
+    <div class="kicker">02 — Contexte macroéconomique</div>
+    <h2>Pressions et opportunités convergentes</h2>
+    <ul style="margin-top:1.5rem; list-style:none;">
+      <li>• Productivité et automatisation</li>
+      <li>• Résilience des chaînes d’approvisionnement</li>
+      <li>• Transition énergétique et verte</li>
+      <li>• Tension persistante sur la main-d’œuvre</li>
+    </ul>
+  </section>
+
+  <!-- 4. Diagnostic -->
+  <section class="slide">
+    <div class="kicker">03 — Diagnostic industriel</div>
+    <div class="grid">
+      <div class="card">
+        <div class="metric">17 000+</div>
+        <p>emplois manufacturiers</p>
+      </div>
+      <div class="card">
+        <div class="metric">1,2 G$</div>
+        <p>investissements sur 5 ans</p>
+      </div>
+    </div>
+    <p style="margin-top:2rem">Secteurs clés : machinerie, métal, transport. Base solide, mais productivité et attraction de talents à renforcer.</p>
+  </section>
+
+  <!-- 5. Forces -->
+  <section class="slide">
+    <div class="kicker">04 — Forces et atouts</div>
+    <h2>Un écosystème déjà structurant</h2>
+    <p>Drummond économique, incubateur, aéroport, Centrexpo, diversité sectorielle. Capacité d’accompagnement éprouvée et visibilité régionale.</p>
+  </section>
+
+  <!-- 6. Enjeux -->
+  <section class="slide">
+    <div class="kicker">05 — Enjeux prioritaires</div>
+    <div class="grid">
+      <div>
+        <h2>Quatre leviers critiques</h2>
+        <ul style="list-style:none; margin-top:1rem;">
+          <li>• Productivité et manufacturier intelligent</li>
+          <li>• Attraction et rétention de talents</li>
+          <li>• Disponibilité d’espaces industriels</li>
+          <li>• Transition numérique et durable</li>
+        </ul>
+      </div>
+      <div class="card"><p>Ces enjeux se renforcent mutuellement. Les alliances inter-MRC offrent un levier d’échelle.</p></div>
+    </div>
+  </section>
+
+  <!-- 7. Vision -->
+  <section class="slide">
+    <div class="kicker">06 — Vision</div>
+    <h1 style="font-size:clamp(2.2rem,4vw,3.6rem)">Faire de la MRC Drummond un pôle référence du manufacturier intelligent au Centre-du-Québec.</h1>
+  </section>
+
+  <!-- 8. Alliances -->
+  <section class="slide">
+    <div class="kicker">11 — Alliances inter-MRC</div>
+    <h2>Agir à l’échelle régionale</h2>
+    <p>Table des MRC, ESD économique, partenariats avec Arthabaska, Bécancour (filière batterie / GCB), Nicolet-Yamaska, L’Érable et MMCQ.</p>
+    <div class="card" style="margin-top:2rem"><p>Exemple : Gestion Circulaire Bécancour — valorisation des résidus de la filière batterie.</p></div>
+  </section>
+
+  <!-- 9. Action -->
+  <section class="slide">
+    <div class="kicker">Prochaines étapes</div>
+    <h2>Feuille de route opérationnelle</h2>
+    <ul style="list-style:none; margin-top:1.5rem;">
+      <li>• Prioriser 2–3 projets structurants inter-MRC</li>
+      <li>• Cartographier les besoins en main-d’œuvre technique</li>
+      <li>• Renforcer l’offre d’accompagnement productivité</li>
+      <li>• Suivre les indicateurs d’investissement et d’occupation des parcs</li>
+    </ul>
+  </section>
+
+</div>
+
+<div class="nav" id="nav"></div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const nav = document.getElementById('nav');
+const progress = document.getElementById('progress');
+let current = 0;
+
+slides.forEach((_, i) => {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  nav.appendChild(d);
+});
+
+function goTo(n) {
+  slides[current].classList.remove('active');
+  slides[current].classList.add(n > current ? 'prev' : 'next');
+  current = n;
+  slides[current].classList.remove('prev', 'next');
+  slides[current].classList.add('active');
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+  progress.style.width = ((current + 1) / slides.length * 100) + '%';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' && current < slides.length - 1) goTo(current + 1);
+  if (e.key === 'ArrowLeft' && current > 0) goTo(current - 1);
+});
+
+progress.style.width = (1 / slides.length * 100) + '%';
+</script>
+</body>
+</html>
